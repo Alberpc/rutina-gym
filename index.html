@@ -4,6 +4,39 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mi Rutina de Gimnasio — v4 (Pro)</title>
+    <!-- Iconos para Android y navegador -->
+    <link
+      rel="icon"
+      type="image/png"
+      href="icons/icon-192.png"
+      sizes="192x192"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      href="icons/icon-512.png"
+      sizes="512x512"
+    />
+
+    <!-- Icono para iOS -->
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-192.png" />
+    <meta name="apple-mobile-web-app-title" content="Rutina Gym Alber" />
+    <!-- manifest -->
+    <link rel="manifest" href="manifest.json" />
+
+    <!-- color de la barra superior en móvil -->
+    <meta name="theme-color" content="#4CAF50" />
+
+    <script>
+      // registrar service worker
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker
+          .register("service-worker.js")
+          .then(() => console.log("Service Worker registrado"))
+          .catch((err) => console.error("Error registrando SW:", err));
+      }
+    </script>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       // Tailwind: modo oscuro por clase
