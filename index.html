@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mi Rutina de Gimnasio — v4 (Pro)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      // Tailwind: modo oscuro por clase
+      tailwind.config = { darkMode: "class" };
+    </script>
+    <style>
+      :root {
+        --bg: #f8fafc; /* fondo app */
+        --card: #ffffff; /* fondo celdas */
+        --muted: #f1f5f9; /* th / barras */
+        --border: #e2e8f0; /* bordes claros */
+        --text: #0f172a; /* texto principal */
+        --text-muted: #475569; /* texto secundario */
+        --accent: #2563eb; /* primario (azul) */
+        --accent-600: #1d4ed8;
+        --accent-700: #1e40af;
+      }
+      .dark:root {
+        --bg: #0b1220; /* fondo elegante oscuro */
+        --card: #0f172a; /* celdas/oscuras */
+        --muted: #0b1220; /* th / barras */
+        --border: #1e293b; /* bordes oscuros */
+        --text: #e2e8f0; /* texto principal */
+        --text-muted: #94a3b8; /* texto secundario */
+        --accent: #3b82f6; /* primario (azul eléctrico) */
+        --accent-600: #2563eb;
+        --accent-700: #1d4ed8;
+      }
+
+      body {
+        background-color: var(--bg);
+        color: var(--text);
+      }
+      .tabla-container {
+        overflow-x: auto;
+      }
+      table {
+        min-width: 760px;
+        border-collapse: collapse;
+        width: 100%;
+        background: var(--card);
+      }
+      th,
+      td {
+        border: 1px solid var(--border);
+        padding: 0.65rem;
+        text-align: center;
+      }
+      th {
+        background-color: var(--muted);
+        color: var(--text);
+        position: sticky;
+        top: 0;
+        z-index: 5;
+      }
+      .dia-celda {
+        background-color: #e2e8f0;
+        font-weight: 600;
+      }
+      .dark .dia-celda {
+        background-color: #1e293b;
+        color: var(--text);
+      }
+      .ejercicio-celda {
+        background-color: var(--card);
+      }
+      input,
+      textarea {
+        background: white;
+        border-color: var(--border);
+        color: var(--text);
+      }
+      .dark input,
+      .dark textarea {
+        background: #0b1424;
+        border-color: var(--border);
+        color: var(--text);
+      }
+      input:focus,
+      textarea:focus,
+      select:focus,
+      button:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.35);
+      }
+
+      /* Botones */
+      .btn {
+        border-radius: 0.375rem;
+        padding: 0.35rem 0.6rem;
+        font-size: 0.85rem;
+        border: 1px solid var(--border);
+      }
+      .btn-primary {
+        background: var(--accent);
+        color: white;
+        border-color: transparent;
+      }
+      .btn-primary:hover {
+        background: var(--accent-600);
+      }
+      .btn-secondary {
+        background: #e2e8f0;
+      }
+      .btn-secondary:hover {
+        background: #cbd5e1;
+      }
+      .dark .btn-secondary {
+        background: #1e293b;
+        color: var(--text);
+        border-color: #334155;
+      }
+      .dark .btn-secondary:hover {
+        background: #263445;
+      }
+      .btn-ghost {
+        background: transparent;
+      }
+      .btn-danger {
+        color: #dc2626;
+      }
+      .bar {
+        backdrop-filter: blur(8px);
+      }
+      .muted {
+        color: var(--text-muted);
+      }
+    </style>
+  </head>
+  <body class="h-full">
+    <!-- Header -->
+    <header
+      class="sticky top-0 z-10 border-b bar"
+      style="
+        background: color-mix(in oklab, var(--bg) 85%, transparent);
+        border-color: var(--border);
+      "
+    >
+      <div
+        class="max-w-6xl mx-auto px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 justify-between"
+      >
+        <div class="flex items-center gap-3">
+          <h1 class="text-2xl font-bold">🏋️‍♂️ Mi Rutina</h1>
+          <span id="monthLabel" class="text-sm muted"></span>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <label class="text-sm muted" for="weekPicker">Semana:</label>
+          <input
+            id="weekPicker"
+            type="week"
+            class="border rounded-md px-2 py-1 text-sm"
+          />
+          <button id="todayBtn" class="btn btn-secondary">Esta semana</button>
+          <div class="mx-2 w-px h-6" style="background: var(--border)"></div>
+          <button
+            id="exportBtn"
+            class="btn btn-secondary"
+            title="Exportar a JSON"
+          >
+            Exportar
+          </button>
+          <label class="btn btn-secondary cursor-pointer" title="Importar JSON">
+            Importar
+            <input
+              id="importInput"
+              type="file"
+              accept="application/json"
+              class="hidden"
+            />
+          </label>
+          <div class="mx-2 w-px h-6" style="background: var(--border)"></div>
+          <button id="darkToggle" class="btn btn-secondary" title="Modo oscuro">
+            🌙
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Contenido -->
+    <main class="max-w-6xl mx-auto p-4 tabla-container">
+      <div id="tips" class="mb-4 text-sm muted">
+        <p>
+          Consejo: añade ejercicios y series, guarda por semana, y exporta tu
+          progreso. Haz clic en el nombre del día para limpiar ese día.
+        </p>
+      </div>
+
+      <table class="rounded-lg">
+        <thead>
+          <tr>
+            <th class="w-28">Día</th>
+            <th class="w-64">Ejercicio</th>
+            <th class="w-56">Serie (peso × reps)</th>
+            <th>Notas</th>
+            <th class="w-44">Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </main>
+
+    <!-- Plantillas (ocultas) -->
+    <template id="rowTemplate">
+      <tr>
+        <td class="dia-celda align-top"></td>
+        <td class="ejercicio-celda align-top">
+          <input
+            class="ejercicio-nombre w-full px-2 py-1 rounded-md border"
+            placeholder="Nombre del ejercicio"
+          />
+        </td>
+        <td class="ejercicio-celda align-top">
+          <div class="space-y-2 series-wrap"></div>
+          <button class="add-serie mt-2 text-xs btn btn-secondary">
+            + Añadir serie
+          </button>
+        </td>
+        <td class="ejercicio-celda align-top">
+          <textarea
+            class="ejercicio-notas w-full px-2 py-1 rounded-md border"
+            rows="2"
+            placeholder="Notas, rango de RPE, técnica..."
+          ></textarea>
+        </td>
+        <td class="ejercicio-celda align-top">
+          <div class="flex flex-wrap gap-2 justify-center">
+            <button class="up btn btn-secondary text-xs" title="Subir">
+              ↑
+            </button>
+            <button class="down btn btn-secondary text-xs" title="Bajar">
+              ↓
+            </button>
+            <button class="dup btn btn-primary text-xs" title="Duplicar">
+              ⎘
+            </button>
+            <button
+              class="del btn btn-ghost btn-danger text-xs"
+              title="Eliminar"
+            >
+              🗑
+            </button>
+          </div>
+        </td>
+      </tr>
+    </template>
+
+    <template id="serieTemplate">
+      <div class="serie-row flex items-center gap-2">
+        <input
+          type="text"
+          inputmode="decimal"
+          pattern="[0-9]*[.,]?[0-9]*"
+          class="peso w-24 px-2 py-1 rounded-md border"
+          placeholder="Peso"
+          title="Peso (kg)"
+        />
+        <span>×</span>
+        <input
+          type="number"
+          class="reps w-20 px-2 py-1 rounded-md border"
+          placeholder="Reps"
+          min="0"
+        />
+        <button
+          class="remove-serie btn btn-secondary text-xs"
+          title="Quitar serie"
+        >
+          –
+        </button>
+      </div>
+    </template>
+
+    <script>
+      /**************
+       * Datos base *
+       **************/
+      const DIAS = [
+        "Lunes",
+        "Martes",
+        "Miércoles",
+        "Jueves",
+        "Viernes",
+        "Sábado",
+        "Domingo",
+      ];
+
+      // Rutina inicial (semilla)
+      const RUTINA_SEMILLA = {
+        Lunes: [],
+        Martes: [
+          {
+            nombre: "Apertura máquina",
+            series: [{ peso: "", reps: "" }],
+            notas: "",
+          },
+          {
+            nombre: "Superior mancuerna o máquina",
+            series: [{ peso: "", reps: "" }],
+            notas: "",
+          },
+          {
+            nombre: "Elevaciones pájaros máquina",
+            series: [{ peso: "", reps: "" }],
+            notas: "",
+          },
+          {
+            nombre: "Deltoides trasero en máquina o mancuernas",
+            series: [{ peso: "", reps: "" }],
+            notas: "",
+          },
+          {
+            nombre: "Tríceps polea barra",
+            series: [{ peso: "", reps: "" }],
+            notas: "",
+          },
+          { nombre: "Fondos", series: [{ peso: "", reps: "" }], notas: "" },
+        ],
+        Miércoles: [],
+        Jueves: [
+          {
+            nombre: "Dominadas al fallo",
+            series: [{ peso: "", reps: "" }],
+            notas: "",
+          },
+          {
+            nombre: "Jalón barra",
+            series: [{ peso: "", reps: "" }],
+            notas: "",
+          },
+          { nombre: "Remo", series: [{ peso: "", reps: "" }], notas: "" },
+          {
+            nombre: "Curl bíceps barra",
+            series: [{ peso: "", reps: "" }],
+            notas: "",
+          },
+        ],
+        Viernes: [],
+        Sábado: [
+          {
+            nombre: "Extensiones",
+            series: [{ peso: "", reps: "" }],
+            notas: "",
+          },
+          { nombre: "Prensa", series: [{ peso: "", reps: "" }], notas: "" },
+          { nombre: "Isquios", series: [{ peso: "", reps: "" }], notas: "" },
+          { nombre: "Gemelos", series: [{ peso: "", reps: "" }], notas: "" },
+        ],
+        Domingo: [],
+      };
+
+      /*****************
+       * Persistencia  *
+       *****************/
+      const STORAGE_PREFIX = "rutina_semana_v2_"; // por semana ISO
+      const el = (sel, root = document) => root.querySelector(sel);
+      const els = (sel, root = document) => [...root.querySelectorAll(sel)];
+
+      const getWeekKey = () => {
+        const v = el("#weekPicker").value || getISOWeekInputValue(new Date());
+        return STORAGE_PREFIX + v; // p.ej. rutina_semana_v2_2025-W34
+      };
+
+      const readWeekData = () => {
+        const raw = localStorage.getItem(getWeekKey());
+        if (!raw) return structuredClone(RUTINA_SEMILLA);
+        try {
+          return JSON.parse(raw);
+        } catch {
+          return structuredClone(RUTINA_SEMILLA);
+        }
+      };
+      const writeWeekData = (data) => {
+        localStorage.setItem(getWeekKey(), JSON.stringify(data));
+      };
+
+      /*****************
+       * Utilidades    *
+       *****************/
+      function getISOWeekInputValue(date) {
+        // Devuelve 'YYYY-Www' compatible con <input type="week">
+        const tmp = new Date(
+          Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
+        );
+        const dayNum = tmp.getUTCDay() || 7;
+        tmp.setUTCDate(tmp.getUTCDate() + 4 - dayNum);
+        const yearStart = new Date(Date.UTC(tmp.getUTCFullYear(), 0, 1));
+        const weekNo = Math.ceil(((tmp - yearStart) / 86400000 + 1) / 7);
+        const weekStr = String(weekNo).padStart(2, "0");
+        return `${tmp.getUTCFullYear()}-W${weekStr}`;
+      }
+
+      function updateMonthLabel() {
+        const val = el("#weekPicker").value;
+        if (!val) return;
+        const [year, w] = val.split("-W");
+        const week = parseInt(w, 10);
+        const firstThursday = new Date(Date.UTC(year, 0, 4));
+        const weekStart = new Date(firstThursday);
+        weekStart.setUTCDate(
+          firstThursday.getUTCDate() -
+            ((firstThursday.getUTCDay() || 7) - 1) +
+            (week - 1) * 7
+        );
+        const monthFmt = new Intl.DateTimeFormat("es-ES", {
+          month: "long",
+          year: "numeric",
+        });
+        el("#monthLabel").textContent = monthFmt.format(weekStart);
+      }
+
+      function saveSoon(data) {
+        clearTimeout(saveSoon._t);
+        saveSoon._t = setTimeout(() => writeWeekData(data), 120);
+      }
+
+      /*****************
+       * Render        *
+       *****************/
+      function renderTabla() {
+        const tbody = el("#tableBody");
+        tbody.innerHTML = "";
+        const data = readWeekData();
+
+        DIAS.forEach((dia) => {
+          const ejercicios = data[dia] || [];
+          if (ejercicios.length === 0) {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+              <td class="dia-celda">
+                <button class="limpiar-dia underline decoration-dotted" data-dia="${dia}" title="Limpiar ${dia} (dejar vacío)">${dia}</button>
+              </td>
+              <td class="ejercicio-celda italic muted" colspan="3">Sin ejercicios</td>
+              <td class="ejercicio-celda">
+                <button class="add-ejercicio btn btn-primary text-sm" data-dia="${dia}">+ Añadir ejercicio</button>
+              </td>
+            `;
+            tbody.appendChild(tr);
+          } else {
+            ejercicios.forEach((ej, idx) => {
+              const tr = document.importNode(el("#rowTemplate").content, true);
+              const tds = els("td", tr);
+
+              tds[0].innerHTML =
+                idx === 0
+                  ? `<button class="limpiar-dia underline decoration-dotted" data-dia="${dia}" title="Limpiar ${dia} (dejar vacío)">${dia}</button>`
+                  : "";
+
+              const nombreInput = els("input", tds[1])[0];
+              nombreInput.value = ej.nombre || "";
+              nombreInput.addEventListener("input", () => {
+                ej.nombre = nombreInput.value;
+                saveSoon(data);
+              });
+
+              const wrap = tds[2].querySelector(".series-wrap");
+              const renderSeries = () => {
+                wrap.innerHTML = "";
+                (ej.series || []).forEach((s, i) => {
+                  const node = document.importNode(
+                    el("#serieTemplate").content,
+                    true
+                  );
+                  const row = node.querySelector(".serie-row");
+                  const peso = row.querySelector(".peso");
+                  const reps = row.querySelector(".reps");
+                  const rmv = row.querySelector(".remove-serie");
+                  peso.value = s.peso ?? "";
+                  reps.value = s.reps ?? "";
+
+                  peso.addEventListener("input", () => {
+                    s.peso = peso.value;
+                    saveSoon(data);
+                  });
+                  reps.addEventListener("input", () => {
+                    s.reps = reps.value;
+                    saveSoon(data);
+                  });
+                  rmv.addEventListener("click", () => {
+                    ej.series.splice(i, 1);
+                    if (ej.series.length === 0)
+                      ej.series.push({ peso: "", reps: "" });
+                    saveSoon(data);
+                    renderSeries();
+                  });
+
+                  wrap.appendChild(node);
+                });
+              };
+              if (!Array.isArray(ej.series) || ej.series.length === 0)
+                ej.series = [{ peso: "", reps: "" }];
+              renderSeries();
+
+              const addSerieBtn = tds[2].querySelector(".add-serie");
+              addSerieBtn.addEventListener("click", () => {
+                ej.series.push({ peso: "", reps: "" });
+                saveSoon(data);
+                renderSeries();
+              });
+
+              const notas = tds[3].querySelector(".ejercicio-notas");
+              notas.value = ej.notas || "";
+              notas.addEventListener("input", () => {
+                ej.notas = notas.value;
+                saveSoon(data);
+              });
+
+              const [btnUp, btnDown, btnDup, btnDel] = els("button", tds[4]);
+              btnUp.addEventListener("click", () => {
+                if (idx > 0) {
+                  [ejercicios[idx - 1], ejercicios[idx]] = [
+                    ejercicios[idx],
+                    ejercicios[idx - 1],
+                  ];
+                  saveSoon(data);
+                  renderTabla();
+                }
+              });
+              btnDown.addEventListener("click", () => {
+                if (idx < ejercicios.length - 1) {
+                  [ejercicios[idx + 1], ejercicios[idx]] = [
+                    ejercicios[idx],
+                    ejercicios[idx + 1],
+                  ];
+                  saveSoon(data);
+                  renderTabla();
+                }
+              });
+              btnDup.addEventListener("click", () => {
+                ejercicios.splice(idx + 1, 0, structuredClone(ej));
+                saveSoon(data);
+                renderTabla();
+              });
+              btnDel.addEventListener("click", () => {
+                ejercicios.splice(idx, 1);
+                saveSoon(data);
+                renderTabla();
+              });
+
+              tbody.appendChild(tr);
+            });
+
+            const addRow = document.createElement("tr");
+            addRow.innerHTML = `
+              <td class="dia-celda"></td>
+              <td class="ejercicio-celda italic muted" colspan="3">Añadir más…</td>
+              <td class="ejercicio-celda">
+                <button class="add-ejercicio btn btn-primary text-sm" data-dia="${dia}">+ Añadir ejercicio</button>
+              </td>
+            `;
+            tbody.appendChild(addRow);
+          }
+        });
+
+        els(".add-ejercicio").forEach((b) => {
+          b.addEventListener("click", (e) => {
+            const d = e.currentTarget.dataset.dia;
+            data[d] = data[d] || [];
+            data[d].push({
+              nombre: "",
+              series: [{ peso: "", reps: "" }],
+              notas: "",
+            });
+            saveSoon(data);
+            renderTabla();
+          });
+        });
+        els(".limpiar-dia").forEach((b) => {
+          b.addEventListener("click", (e) => {
+            const d = e.currentTarget.dataset.dia;
+            if (confirm(`¿Seguro que quieres limpiar ${d}?`)) {
+              data[d] = [];
+              saveSoon(data);
+              renderTabla();
+            }
+          });
+        });
+      }
+
+      /*****************
+       * Export/Import *
+       *****************/
+      function exportar() {
+        const all = {};
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && k.startsWith(STORAGE_PREFIX)) {
+            all[k] = localStorage.getItem(k);
+          }
+        }
+        const blob = new Blob([JSON.stringify(all, null, 2)], {
+          type: "application/json",
+        });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "mi_rutina_gimnasio.json";
+        a.click();
+        URL.revokeObjectURL(a.href);
+      }
+
+      function importar(file) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          try {
+            const obj = JSON.parse(reader.result);
+            let n = 0;
+            Object.entries(obj).forEach(([k, v]) => {
+              if (k.startsWith(STORAGE_PREFIX)) {
+                localStorage.setItem(k, v);
+                n++;
+              }
+            });
+            alert(`Importación completada (${n} semanas).`);
+            renderTabla();
+          } catch (e) {
+            alert("Archivo no válido.");
+          }
+        };
+        reader.readAsText(file);
+      }
+
+      /*****************
+       * Modo oscuro   *
+       *****************/
+      const DARK_KEY = "rutina_dark_mode";
+      function applyDarkMode() {
+        const enabled = localStorage.getItem(DARK_KEY) === "1";
+        document.documentElement.classList.toggle("dark", enabled);
+        const btn = document.getElementById("darkToggle");
+        if (btn) btn.textContent = enabled ? "☀️" : "🌙";
+      }
+
+      /*****************
+       * Init          *
+       *****************/
+      function initWeek() {
+        const todayWeek = getISOWeekInputValue(new Date());
+        document.getElementById("weekPicker").value = todayWeek;
+        updateMonthLabel();
+      }
+
+      function main() {
+        initWeek();
+        renderTabla();
+
+        document.getElementById("todayBtn").addEventListener("click", () => {
+          document.getElementById("weekPicker").value = getISOWeekInputValue(
+            new Date()
+          );
+          updateMonthLabel();
+          renderTabla();
+        });
+
+        document.getElementById("weekPicker").addEventListener("change", () => {
+          updateMonthLabel();
+          renderTabla();
+        });
+
+        document
+          .getElementById("exportBtn")
+          .addEventListener("click", exportar);
+        document
+          .getElementById("importInput")
+          .addEventListener("change", (e) => {
+            const file = e.target.files?.[0];
+            if (file) importar(file);
+            e.target.value = "";
+          });
+
+        applyDarkMode();
+        document.getElementById("darkToggle").addEventListener("click", () => {
+          const next = !(localStorage.getItem(DARK_KEY) === "1");
+          localStorage.setItem(DARK_KEY, next ? "1" : "0");
+          applyDarkMode();
+        });
+      }
+
+      document.addEventListener("DOMContentLoaded", main);
+    </script>
+  </body>
+</html>
