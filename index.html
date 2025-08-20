@@ -1,156 +1,89 @@
 <!DOCTYPE html>
-<html lang="es" class="h-full">
+<html lang="es">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Mi Rutina de Gimnasio — v4 (Pro)</title>
-    <!-- Iconos para Android y navegador -->
-    <link
-      rel="icon"
-      type="image/png"
-      href="icons/icon-192.png"
-      sizes="192x192"
-    />
-    <link
-      rel="icon"
-      type="image/png"
-      href="icons/icon-512.png"
-      sizes="512x512"
-    />
-
-    <!-- Icono para iOS -->
-    <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-192.png" />
-    <meta name="apple-mobile-web-app-title" content="Rutina Gym Alber" />
-    <!-- manifest -->
-    <link rel="manifest" href="manifest.json" />
-
-    <!-- color de la barra superior en móvil -->
-    <meta name="theme-color" content="#4CAF50" />
-
-    <script>
-      // registrar service worker
-      if ("serviceWorker" in navigator) {
-        navigator.serviceWorker
-          .register("service-worker.js")
-          .then(() => console.log("Service Worker registrado"))
-          .catch((err) => console.error("Error registrando SW:", err));
-      }
-    </script>
-
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Mi Rutina de Gimnasio — v7 (Cards optimizada)</title>
+    <!-- Tailwind solo para utilidades básicas; el diseño principal va en CSS propio -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-      // Tailwind: modo oscuro por clase
       tailwind.config = { darkMode: "class" };
     </script>
     <style>
       :root {
-        --bg: #f8fafc; /* fondo app */
-        --card: #ffffff; /* fondo celdas */
-        --muted: #f1f5f9; /* th / barras */
-        --border: #e2e8f0; /* bordes claros */
-        --text: #0f172a; /* texto principal */
-        --text-muted: #475569; /* texto secundario */
-        --accent: #2563eb; /* primario (azul) */
+        --bg: #f8fafc;
+        --card: #fff;
+        --muted: #f1f5f9;
+        --border: #e2e8f0;
+        --text: #0f172a;
+        --text-muted: #475569;
+        --accent: #2563eb;
         --accent-600: #1d4ed8;
-        --accent-700: #1e40af;
       }
       .dark:root {
-        --bg: #0b1220; /* fondo elegante oscuro */
-        --card: #0f172a; /* celdas/oscuras */
-        --muted: #0b1220; /* th / barras */
-        --border: #1e293b; /* bordes oscuros */
-        --text: #e2e8f0; /* texto principal */
-        --text-muted: #94a3b8; /* texto secundario */
-        --accent: #3b82f6; /* primario (azul eléctrico) */
+        --bg: #0b1220;
+        --card: #0f172a;
+        --muted: #0b1220;
+        --border: #1e293b;
+        --text: #e2e8f0;
+        --text-muted: #94a3b8;
+        --accent: #3b82f6;
         --accent-600: #2563eb;
-        --accent-700: #1d4ed8;
       }
-
       body {
-        background-color: var(--bg);
+        background: var(--bg);
         color: var(--text);
+        font-family: ui-sans-serif, system-ui;
+        -webkit-font-smoothing: antialiased;
       }
-      .tabla-container {
-        overflow-x: auto;
+      .container {
+        max-width: 1120px;
+        margin: 0 auto;
+        padding: 16px;
       }
-      table {
-        min-width: 760px;
-        border-collapse: collapse;
-        width: 100%;
-        background: var(--card);
-      }
-      th,
-      td {
-        border: 1px solid var(--border);
-        padding: 0.65rem;
-        text-align: center;
-      }
-      th {
-        background-color: var(--muted);
-        color: var(--text);
+      header {
         position: sticky;
         top: 0;
-        z-index: 5;
+        z-index: 20;
+        background: color-mix(in oklab, var(--bg) 85%, transparent);
+        border-bottom: 1px solid var(--border);
+        backdrop-filter: blur(8px);
       }
-      .dia-celda {
-        background-color: #e2e8f0;
-        font-weight: 600;
+      .toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 16px;
       }
-      .dark .dia-celda {
-        background-color: #1e293b;
-        color: var(--text);
+      .muted {
+        color: var(--text-muted);
       }
-      .ejercicio-celda {
-        background-color: var(--card);
-      }
-      input,
-      textarea {
-        background: white;
-        border-color: var(--border);
-        color: var(--text);
-      }
-      .dark input,
-      .dark textarea {
-        background: #0b1424;
-        border-color: var(--border);
-        color: var(--text);
-      }
-      input:focus,
-      textarea:focus,
-      select:focus,
-      button:focus {
-        outline: none;
-        box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.35);
-      }
-
-      /* Botones */
       .btn {
-        border-radius: 0.375rem;
+        border: 1px solid var(--border);
+        border-radius: 8px;
         padding: 0.35rem 0.6rem;
         font-size: 0.85rem;
-        border: 1px solid var(--border);
+        background: #e2e8f0;
+      }
+      .btn:hover {
+        background: #cbd5e1;
+      }
+      .dark .btn {
+        background: #1e293b;
+        border-color: #334155;
+      }
+      .dark .btn:hover {
+        background: #263445;
       }
       .btn-primary {
         background: var(--accent);
-        color: white;
         border-color: transparent;
+        color: #fff;
       }
       .btn-primary:hover {
         background: var(--accent-600);
-      }
-      .btn-secondary {
-        background: #e2e8f0;
-      }
-      .btn-secondary:hover {
-        background: #cbd5e1;
-      }
-      .dark .btn-secondary {
-        background: #1e293b;
-        color: var(--text);
-        border-color: #334155;
-      }
-      .dark .btn-secondary:hover {
-        background: #263445;
       }
       .btn-ghost {
         background: transparent;
@@ -158,47 +91,206 @@
       .btn-danger {
         color: #dc2626;
       }
-      .bar {
-        backdrop-filter: blur(8px);
+      input,
+      textarea {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 0.45rem 0.55rem;
+        background: #fff;
+        color: var(--text);
       }
-      .muted {
-        color: var(--text-muted);
+      .dark input,
+      .dark textarea {
+        background: #0b1424;
+        color: var(--text);
+      }
+      input:focus,
+      textarea:focus,
+      button:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.35);
+      }
+      /* Grid de días */
+      .days {
+        display: grid;
+        gap: 16px;
+      }
+      @media (min-width: 900px) {
+        .days {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+      /* Card del día */
+      .day-card {
+        border: 1px solid var(--border);
+        background: var(--card);
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+      }
+      .day-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 12px;
+        background: var(--accent);
+        color: #fff;
+      }
+      .dark .day-head {
+        background: var(--accent-600);
+      }
+      .day-body {
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      /* Ejercicio item */
+      .exercise {
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 10px;
+        background: var(--card);
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .ex-top {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+      .handle {
+        cursor: grab;
+      }
+      .handle:active {
+        cursor: grabbing;
+      }
+      .ex-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-left: auto;
+      }
+      .series {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .serie-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+      }
+      .serie-row .peso,
+      .serie-row .reps {
+        width: 110px;
+      }
+      .add-serie {
+        align-self: flex-start;
+      }
+      .notes-quick {
+        width: 100%;
+      }
+      /* Drag visual */
+      .dragging {
+        opacity: 0.6;
+      }
+      .drop-target {
+        outline: 2px dashed var(--accent);
+      }
+      /* Toasts */
+      #toast {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 16px;
+        display: flex;
+        justify-content: center;
+        pointer-events: none;
+        z-index: 50;
+      }
+      #toast .msg {
+        background: var(--card);
+        color: var(--text);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 10px 14px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+        animation: fade 3s ease both;
+      }
+      @keyframes fade {
+        0% {
+          opacity: 0;
+          transform: translateY(6px);
+        }
+        10% {
+          opacity: 1;
+          transform: none;
+        }
+        90% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 0;
+          transform: translateY(6px);
+        }
+      }
+      /* Modal notas */
+      dialog.notes-modal::backdrop {
+        background: rgba(0, 0, 0, 0.35);
+      }
+      dialog.notes-modal {
+        width: min(720px, 92vw);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 0;
+        background: var(--card);
+        color: var(--text);
+      }
+      .notes-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 14px;
+        background: var(--muted);
+        border-bottom: 1px solid var(--border);
+      }
+      .notes-body {
+        padding: 12px 14px;
+      }
+      .notes-body textarea {
+        width: 100%;
+        min-height: 32vh;
+      }
+
+      .exercise .handle {
+        text-align: center;
+        width: 100%;
       }
     </style>
   </head>
-  <body class="h-full">
+  <body>
+    <!-- Toast -->
+    <div id="toast" aria-live="polite"></div>
+
     <!-- Header -->
-    <header
-      class="sticky top-0 z-10 border-b bar"
-      style="
-        background: color-mix(in oklab, var(--bg) 85%, transparent);
-        border-color: var(--border);
-      "
-    >
-      <div
-        class="max-w-6xl mx-auto px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 justify-between"
-      >
+    <header>
+      <div class="toolbar container">
         <div class="flex items-center gap-3">
-          <h1 class="text-2xl font-bold">🏋️‍♂️ Mi Rutina</h1>
+          <h1 class="text-xl font-bold">🏋️‍♂️ Mi Rutina</h1>
           <span id="monthLabel" class="text-sm muted"></span>
         </div>
         <div class="flex flex-wrap items-center gap-2">
-          <label class="text-sm muted" for="weekPicker">Semana:</label>
-          <input
-            id="weekPicker"
-            type="week"
-            class="border rounded-md px-2 py-1 text-sm"
-          />
-          <button id="todayBtn" class="btn btn-secondary">Esta semana</button>
-          <div class="mx-2 w-px h-6" style="background: var(--border)"></div>
-          <button
-            id="exportBtn"
-            class="btn btn-secondary"
-            title="Exportar a JSON"
-          >
+          <label for="datePicker" class="text-sm muted">Fecha:</label>
+          <input id="datePicker" type="date" />
+          <button id="todayBtn" class="btn">Esta semana</button>
+          <span class="w-px h-6 bg-slate-300 dark:bg-slate-600 mx-2"></span>
+          <button id="exportBtn" class="btn" title="Exportar a JSON">
             Exportar
           </button>
-          <label class="btn btn-secondary cursor-pointer" title="Importar JSON">
+          <label class="btn cursor-pointer" title="Importar JSON">
             Importar
             <input
               id="importInput"
@@ -207,112 +299,44 @@
               class="hidden"
             />
           </label>
-          <div class="mx-2 w-px h-6" style="background: var(--border)"></div>
-          <button id="darkToggle" class="btn btn-secondary" title="Modo oscuro">
-            🌙
-          </button>
+          <span class="w-px h-6 bg-slate-300 dark:bg-slate-600 mx-2"></span>
+          <button id="darkToggle" class="btn" title="Modo oscuro">🌙</button>
         </div>
       </div>
     </header>
 
-    <!-- Contenido -->
-    <main class="max-w-6xl mx-auto p-4 tabla-container">
-      <div id="tips" class="mb-4 text-sm muted">
-        <p>
-          Consejo: añade ejercicios y series, guarda por semana, y exporta tu
-          progreso. Haz clic en el nombre del día para limpiar ese día.
-        </p>
-      </div>
+    <!-- Tips -->
+    <div class="container">
+      <p class="muted text-sm mt-3 mb-2">
+        Consejo: usa <strong>☰ Mover</strong> para arrastrar y reordenar
+        ejercicios. Haz clic en el nombre del día para limpiar ese día.
+      </p>
+    </div>
 
-      <table class="rounded-lg">
-        <thead>
-          <tr>
-            <th class="w-28">Día</th>
-            <th class="w-64">Ejercicio</th>
-            <th class="w-56">Serie (peso × reps)</th>
-            <th>Notas</th>
-            <th class="w-44">Acciones</th>
-          </tr>
-        </thead>
-        <tbody id="tableBody"></tbody>
-      </table>
+    <!-- Días (cards) -->
+    <main class="container">
+      <div id="days" class="days" aria-live="polite"></div>
     </main>
 
-    <!-- Plantillas (ocultas) -->
-    <template id="rowTemplate">
-      <tr>
-        <td class="dia-celda align-top"></td>
-        <td class="ejercicio-celda align-top">
-          <input
-            class="ejercicio-nombre w-full px-2 py-1 rounded-md border"
-            placeholder="Nombre del ejercicio"
-          />
-        </td>
-        <td class="ejercicio-celda align-top">
-          <div class="space-y-2 series-wrap"></div>
-          <button class="add-serie mt-2 text-xs btn btn-secondary">
-            + Añadir serie
-          </button>
-        </td>
-        <td class="ejercicio-celda align-top">
-          <textarea
-            class="ejercicio-notas w-full px-2 py-1 rounded-md border"
-            rows="2"
-            placeholder="Notas, rango de RPE, técnica..."
-          ></textarea>
-        </td>
-        <td class="ejercicio-celda align-top">
-          <div class="flex flex-wrap gap-2 justify-center">
-            <button class="up btn btn-secondary text-xs" title="Subir">
-              ↑
-            </button>
-            <button class="down btn btn-secondary text-xs" title="Bajar">
-              ↓
-            </button>
-            <button class="dup btn btn-primary text-xs" title="Duplicar">
-              ⎘
-            </button>
-            <button
-              class="del btn btn-ghost btn-danger text-xs"
-              title="Eliminar"
-            >
-              🗑
-            </button>
-          </div>
-        </td>
-      </tr>
-    </template>
-
-    <template id="serieTemplate">
-      <div class="serie-row flex items-center gap-2">
-        <input
-          type="text"
-          inputmode="decimal"
-          pattern="[0-9]*[.,]?[0-9]*"
-          class="peso w-24 px-2 py-1 rounded-md border"
-          placeholder="Peso"
-          title="Peso (kg)"
-        />
-        <span>×</span>
-        <input
-          type="number"
-          class="reps w-20 px-2 py-1 rounded-md border"
-          placeholder="Reps"
-          min="0"
-        />
-        <button
-          class="remove-serie btn btn-secondary text-xs"
-          title="Quitar serie"
-        >
-          –
-        </button>
+    <!-- Modal Notas -->
+    <dialog class="notes-modal" id="notesModal">
+      <div class="notes-header">
+        <strong>Notas</strong>
+        <button class="btn" id="closeNotes">Cerrar</button>
       </div>
-    </template>
+      <div class="notes-body">
+        <textarea
+          id="notesTextarea"
+          placeholder="Notas, RPE, técnica…"
+        ></textarea>
+        <div class="mt-3" style="text-align: right">
+          <button class="btn btn-primary" id="saveNotes">Guardar</button>
+        </div>
+      </div>
+    </dialog>
 
     <script>
-      /**************
-       * Datos base *
-       **************/
+      /* ========= Datos base ========= */
       const DIAS = [
         "Lunes",
         "Martes",
@@ -322,8 +346,6 @@
         "Sábado",
         "Domingo",
       ];
-
-      // Rutina inicial (semilla)
       const RUTINA_SEMILLA = {
         Lunes: [],
         Martes: [
@@ -387,18 +409,30 @@
         Domingo: [],
       };
 
-      /*****************
-       * Persistencia  *
-       *****************/
-      const STORAGE_PREFIX = "rutina_semana_v2_"; // por semana ISO
-      const el = (sel, root = document) => root.querySelector(sel);
-      const els = (sel, root = document) => [...root.querySelectorAll(sel)];
+      /* ========= Persistencia ========= */
+      const STORAGE_PREFIX = "rutina_cards_v7_";
+      const el = (s, r = document) => r.querySelector(s);
+      const els = (s, r = document) => [...r.querySelectorAll(s)];
 
+      const getISODateInputValue = (d) =>
+        `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(
+          2,
+          "0"
+        )}-${String(d.getDate()).padStart(2, "0")}`;
+      function getISOWeekInputValue(date) {
+        const t = new Date(
+          Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
+        );
+        const dayNum = t.getUTCDay() || 7;
+        t.setUTCDate(t.getUTCDate() + 4 - dayNum);
+        const yearStart = new Date(Date.UTC(t.getUTCFullYear(), 0, 1));
+        const weekNo = Math.ceil(((t - yearStart) / 86400000 + 1) / 7);
+        return `${t.getUTCFullYear()}-W${String(weekNo).padStart(2, "0")}`;
+      }
       const getWeekKey = () => {
-        const v = el("#weekPicker").value || getISOWeekInputValue(new Date());
-        return STORAGE_PREFIX + v; // p.ej. rutina_semana_v2_2025-W34
+        const v = el("#datePicker").value || getISODateInputValue(new Date());
+        return STORAGE_PREFIX + getISOWeekInputValue(new Date(v));
       };
-
       const readWeekData = () => {
         const raw = localStorage.getItem(getWeekKey());
         if (!raw) return structuredClone(RUTINA_SEMILLA);
@@ -408,223 +442,270 @@
           return structuredClone(RUTINA_SEMILLA);
         }
       };
-      const writeWeekData = (data) => {
+      const writeWeekData = (data) =>
         localStorage.setItem(getWeekKey(), JSON.stringify(data));
-      };
-
-      /*****************
-       * Utilidades    *
-       *****************/
-      function getISOWeekInputValue(date) {
-        // Devuelve 'YYYY-Www' compatible con <input type="week">
-        const tmp = new Date(
-          Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
-        );
-        const dayNum = tmp.getUTCDay() || 7;
-        tmp.setUTCDate(tmp.getUTCDate() + 4 - dayNum);
-        const yearStart = new Date(Date.UTC(tmp.getUTCFullYear(), 0, 1));
-        const weekNo = Math.ceil(((tmp - yearStart) / 86400000 + 1) / 7);
-        const weekStr = String(weekNo).padStart(2, "0");
-        return `${tmp.getUTCFullYear()}-W${weekStr}`;
-      }
-
-      function updateMonthLabel() {
-        const val = el("#weekPicker").value;
-        if (!val) return;
-        const [year, w] = val.split("-W");
-        const week = parseInt(w, 10);
-        const firstThursday = new Date(Date.UTC(year, 0, 4));
-        const weekStart = new Date(firstThursday);
-        weekStart.setUTCDate(
-          firstThursday.getUTCDate() -
-            ((firstThursday.getUTCDay() || 7) - 1) +
-            (week - 1) * 7
-        );
-        const monthFmt = new Intl.DateTimeFormat("es-ES", {
-          month: "long",
-          year: "numeric",
-        });
-        el("#monthLabel").textContent = monthFmt.format(weekStart);
-      }
-
       function saveSoon(data) {
         clearTimeout(saveSoon._t);
         saveSoon._t = setTimeout(() => writeWeekData(data), 120);
       }
 
-      /*****************
-       * Render        *
-       *****************/
-      function renderTabla() {
-        const tbody = el("#tableBody");
-        tbody.innerHTML = "";
+      /* ========= UI util ========= */
+      function updateMonthLabel() {
+        const v = el("#datePicker").value;
+        if (!v) return;
+        const d = new Date(v);
+        el("#monthLabel").textContent = new Intl.DateTimeFormat("es-ES", {
+          month: "long",
+          year: "numeric",
+        }).format(d);
+      }
+      function toast(msg) {
+        const t = el("#toast");
+        const n = document.createElement("div");
+        n.className = "msg";
+        n.textContent = msg;
+        t.appendChild(n);
+        setTimeout(() => n.remove(), 3000);
+      }
+      function compareWithPreviousWeek(dia, idxEj) {
+        const currentIso = getWeekKey().replace(STORAGE_PREFIX, "");
+        const [year, w] = currentIso.split("-W").map(Number);
+        const firstThu = new Date(Date.UTC(year, 0, 4));
+        const weekStart = new Date(firstThu);
+        weekStart.setUTCDate(
+          firstThu.getUTCDate() -
+            ((firstThu.getUTCDay() || 7) - 1) +
+            (w - 1) * 7
+        );
+        const prevDate = new Date(weekStart);
+        prevDate.setUTCDate(prevDate.getUTCDate() - 7);
+        const prevKey = STORAGE_PREFIX + getISOWeekInputValue(prevDate);
+        const raw = localStorage.getItem(prevKey);
+        if (!raw) return null;
+        try {
+          const dPrev = JSON.parse(raw);
+          return (dPrev[dia] || [])[idxEj] || null;
+        } catch {
+          return null;
+        }
+      }
+
+      /* ========= Render ========= */
+      function render() {
+        const root = el("#days");
+        root.innerHTML = "";
         const data = readWeekData();
 
         DIAS.forEach((dia) => {
+          const card = document.createElement("section");
+          card.className = "day-card";
+          card.dataset.dia = dia;
+
+          // Header del día
+          card.innerHTML = `
+      <div class="day-head">
+        <div class="flex items-center gap-2">
+          <strong>${dia}</strong>
+        </div>
+        <div class="flex gap-2">
+          <button class="btn btn-ghost underline limpiar-dia" title="Limpiar ${dia}">Limpiar</button>
+          <button class="btn btn-primary add-ejercicio" title="Añadir ejercicio">+ Añadir</button>
+        </div>
+      </div>
+      <div class="day-body" role="list"></div>
+    `;
+          root.appendChild(card);
+
+          const body = card.querySelector(".day-body");
           const ejercicios = data[dia] || [];
+
           if (ejercicios.length === 0) {
-            const tr = document.createElement("tr");
-            tr.innerHTML = `
-              <td class="dia-celda">
-                <button class="limpiar-dia underline decoration-dotted" data-dia="${dia}" title="Limpiar ${dia} (dejar vacío)">${dia}</button>
-              </td>
-              <td class="ejercicio-celda italic muted" colspan="3">Sin ejercicios</td>
-              <td class="ejercicio-celda">
-                <button class="add-ejercicio btn btn-primary text-sm" data-dia="${dia}">+ Añadir ejercicio</button>
-              </td>
-            `;
-            tbody.appendChild(tr);
-          } else {
-            ejercicios.forEach((ej, idx) => {
-              const tr = document.importNode(el("#rowTemplate").content, true);
-              const tds = els("td", tr);
-
-              tds[0].innerHTML =
-                idx === 0
-                  ? `<button class="limpiar-dia underline decoration-dotted" data-dia="${dia}" title="Limpiar ${dia} (dejar vacío)">${dia}</button>`
-                  : "";
-
-              const nombreInput = els("input", tds[1])[0];
-              nombreInput.value = ej.nombre || "";
-              nombreInput.addEventListener("input", () => {
-                ej.nombre = nombreInput.value;
-                saveSoon(data);
-              });
-
-              const wrap = tds[2].querySelector(".series-wrap");
-              const renderSeries = () => {
-                wrap.innerHTML = "";
-                (ej.series || []).forEach((s, i) => {
-                  const node = document.importNode(
-                    el("#serieTemplate").content,
-                    true
-                  );
-                  const row = node.querySelector(".serie-row");
-                  const peso = row.querySelector(".peso");
-                  const reps = row.querySelector(".reps");
-                  const rmv = row.querySelector(".remove-serie");
-                  peso.value = s.peso ?? "";
-                  reps.value = s.reps ?? "";
-
-                  peso.addEventListener("input", () => {
-                    s.peso = peso.value;
-                    saveSoon(data);
-                  });
-                  reps.addEventListener("input", () => {
-                    s.reps = reps.value;
-                    saveSoon(data);
-                  });
-                  rmv.addEventListener("click", () => {
-                    ej.series.splice(i, 1);
-                    if (ej.series.length === 0)
-                      ej.series.push({ peso: "", reps: "" });
-                    saveSoon(data);
-                    renderSeries();
-                  });
-
-                  wrap.appendChild(node);
-                });
-              };
-              if (!Array.isArray(ej.series) || ej.series.length === 0)
-                ej.series = [{ peso: "", reps: "" }];
-              renderSeries();
-
-              const addSerieBtn = tds[2].querySelector(".add-serie");
-              addSerieBtn.addEventListener("click", () => {
-                ej.series.push({ peso: "", reps: "" });
-                saveSoon(data);
-                renderSeries();
-              });
-
-              const notas = tds[3].querySelector(".ejercicio-notas");
-              notas.value = ej.notas || "";
-              notas.addEventListener("input", () => {
-                ej.notas = notas.value;
-                saveSoon(data);
-              });
-
-              const [btnUp, btnDown, btnDup, btnDel] = els("button", tds[4]);
-              btnUp.addEventListener("click", () => {
-                if (idx > 0) {
-                  [ejercicios[idx - 1], ejercicios[idx]] = [
-                    ejercicios[idx],
-                    ejercicios[idx - 1],
-                  ];
-                  saveSoon(data);
-                  renderTabla();
-                }
-              });
-              btnDown.addEventListener("click", () => {
-                if (idx < ejercicios.length - 1) {
-                  [ejercicios[idx + 1], ejercicios[idx]] = [
-                    ejercicios[idx],
-                    ejercicios[idx + 1],
-                  ];
-                  saveSoon(data);
-                  renderTabla();
-                }
-              });
-              btnDup.addEventListener("click", () => {
-                ejercicios.splice(idx + 1, 0, structuredClone(ej));
-                saveSoon(data);
-                renderTabla();
-              });
-              btnDel.addEventListener("click", () => {
-                ejercicios.splice(idx, 1);
-                saveSoon(data);
-                renderTabla();
-              });
-
-              tbody.appendChild(tr);
-            });
-
-            const addRow = document.createElement("tr");
-            addRow.innerHTML = `
-              <td class="dia-celda"></td>
-              <td class="ejercicio-celda italic muted" colspan="3">Añadir más…</td>
-              <td class="ejercicio-celda">
-                <button class="add-ejercicio btn btn-primary text-sm" data-dia="${dia}">+ Añadir ejercicio</button>
-              </td>
-            `;
-            tbody.appendChild(addRow);
+            const empty = document.createElement("div");
+            empty.className = "muted text-sm";
+            empty.textContent = "Sin ejercicios";
+            body.appendChild(empty);
           }
-        });
 
-        els(".add-ejercicio").forEach((b) => {
-          b.addEventListener("click", (e) => {
-            const d = e.currentTarget.dataset.dia;
-            data[d] = data[d] || [];
-            data[d].push({
+          ejercicios.forEach((ej, idx) => {
+            body.appendChild(renderExercise(data, dia, ejercicios, ej, idx));
+          });
+
+          // listeners de día
+          card.querySelector(".add-ejercicio").addEventListener("click", () => {
+            ejercicios.push({
               nombre: "",
               series: [{ peso: "", reps: "" }],
               notas: "",
             });
             saveSoon(data);
-            renderTabla();
+            render();
           });
-        });
-        els(".limpiar-dia").forEach((b) => {
-          b.addEventListener("click", (e) => {
-            const d = e.currentTarget.dataset.dia;
-            if (confirm(`¿Seguro que quieres limpiar ${d}?`)) {
-              data[d] = [];
+          card.querySelector(".limpiar-dia").addEventListener("click", () => {
+            if (confirm(`¿Seguro que quieres limpiar ${dia}?`)) {
+              data[dia] = [];
               saveSoon(data);
-              renderTabla();
+              render();
             }
           });
         });
       }
 
-      /*****************
-       * Export/Import *
-       *****************/
+      function renderExercise(data, dia, ejercicios, ej, idx) {
+        const ex = document.createElement("article");
+        ex.className = "exercise";
+        ex.setAttribute("role", "listitem");
+
+        ex.innerHTML = `
+   <div class="ex-top">
+     <input class="ex-name flex-1" placeholder="Nombre del ejercicio" />
+   </div>
+   <div class="series"></div>
+    <button class="btn add-serie">+ Añadir serie</button>
+   <div class="notes">
+     <textarea class="notes-quick" rows="2" placeholder="Notas rápidas (RPE, técnica…)"></textarea>
+     <button class="btn mt-2 open-notes">✎ Editar en grande</button>
+  </div>
+  <div class="mt-3">
+    <button class="btn handle w-full" draggable="true" title="Arrastra para reordenar">☰ Mover</button>
+  </div>
+  `;
+
+        const name = ex.querySelector(".ex-name");
+        name.value = ej.nombre || "";
+        name.addEventListener("input", () => {
+          ej.nombre = name.value;
+          saveSoon(data);
+        });
+
+        // Series
+        const wrap = ex.querySelector(".series");
+        const renderSeries = () => {
+          wrap.innerHTML = "";
+          (ej.series || []).forEach((s, i) => {
+            const row = document.createElement("div");
+            row.className = "serie-row";
+            row.innerHTML = `
+        <input class="peso" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" placeholder="Peso (kg)" title="Peso (kg)" />
+        <span>×</span>
+        <input class="reps" type="number" min="0" placeholder="Reps" />
+        <button class="btn remove-serie" title="Quitar serie">–</button>
+      `;
+            const peso = row.querySelector(".peso");
+            const reps = row.querySelector(".reps");
+            const rmv = row.querySelector(".remove-serie");
+            peso.value = s.peso ?? "";
+            reps.value = s.reps ?? "";
+
+            const onChange = () => {
+              const prev = compareWithPreviousWeek(dia, idx) || {};
+              const prevS = (prev.series || [])[i] || {};
+              const pv = parseFloat(String(peso.value).replace(",", "."));
+              const rv = parseInt(reps.value || "0", 10);
+              const pp = parseFloat(String(prevS.peso || "").replace(",", "."));
+              const rp = parseInt(prevS.reps || "0", 10);
+              let imp = false;
+              if (!isNaN(pv) && !isNaN(pp) && pv > pp) imp = true;
+              if (!isNaN(rv) && !isNaN(rp) && rv > rp) imp = true;
+              if (imp) toast(`🔥 ¡Progreso en ${ej.nombre || "un ejercicio"}!`);
+            };
+
+            peso.addEventListener("input", () => {
+              s.peso = peso.value;
+              saveSoon(data);
+              onChange();
+            });
+            reps.addEventListener("input", () => {
+              s.reps = reps.value;
+              saveSoon(data);
+              onChange();
+            });
+            rmv.addEventListener("click", () => {
+              ej.series.splice(i, 1);
+              if (ej.series.length === 0)
+                ej.series.push({ peso: "", reps: "" });
+              saveSoon(data);
+              renderSeries();
+            });
+
+            wrap.appendChild(row);
+          });
+        };
+        if (!Array.isArray(ej.series) || ej.series.length === 0)
+          ej.series = [{ peso: "", reps: "" }];
+        renderSeries();
+
+        ex.querySelector(".add-serie").addEventListener("click", () => {
+          ej.series.push({ peso: "", reps: "" });
+          saveSoon(data);
+          renderSeries();
+        });
+
+        // Notas
+        const quick = ex.querySelector(".notes-quick");
+        quick.value = ej.notas || "";
+        quick.addEventListener("input", () => {
+          ej.notas = quick.value;
+          saveSoon(data);
+        });
+
+        const notesModal = el("#notesModal");
+        const notesTA = el("#notesTextarea");
+        ex.querySelector(".open-notes").addEventListener("click", () => {
+          notesTA.value = ej.notas || "";
+          notesModal.showModal();
+          el("#saveNotes").onclick = () => {
+            ej.notas = notesTA.value;
+            quick.value = ej.notas;
+            saveSoon(data);
+            notesModal.close();
+          };
+          el("#closeNotes").onclick = () => notesModal.close();
+        });
+
+        // Drag & drop (solo con handle)
+        const handle = ex.querySelector(".handle");
+        handle.addEventListener("dragstart", (e) => {
+          ex.classList.add("dragging");
+          e.dataTransfer.setData("text/plain", JSON.stringify({ dia, idx }));
+        });
+        handle.addEventListener("dragend", () =>
+          ex.classList.remove("dragging")
+        );
+
+        // Receptores: todos los exercise hermanos
+        ex.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          ex.classList.add("drop-target");
+        });
+        ex.addEventListener("dragleave", () =>
+          ex.classList.remove("drop-target")
+        );
+        ex.addEventListener("drop", (e) => {
+          e.preventDefault();
+          ex.classList.remove("drop-target");
+          const payload = JSON.parse(
+            e.dataTransfer.getData("text/plain") || "{}"
+          );
+          if (payload.dia !== dia) return;
+          const fromIdx = payload.idx;
+          if (fromIdx === undefined || fromIdx === idx) return;
+          const item = ejercicios.splice(fromIdx, 1)[0];
+          const insertAt = idx + (fromIdx < idx ? 1 : 0);
+          ejercicios.splice(insertAt, 0, item);
+          saveSoon(data);
+          render();
+        });
+
+        return ex;
+      }
+
+      /* ========= Export/Import ========= */
       function exportar() {
         const all = {};
         for (let i = 0; i < localStorage.length; i++) {
           const k = localStorage.key(i);
-          if (k && k.startsWith(STORAGE_PREFIX)) {
+          if (k && k.startsWith(STORAGE_PREFIX))
             all[k] = localStorage.getItem(k);
-          }
         }
         const blob = new Blob([JSON.stringify(all, null, 2)], {
           type: "application/json",
@@ -635,12 +716,11 @@
         a.click();
         URL.revokeObjectURL(a.href);
       }
-
       function importar(file) {
-        const reader = new FileReader();
-        reader.onload = () => {
+        const r = new FileReader();
+        r.onload = () => {
           try {
-            const obj = JSON.parse(reader.result);
+            const obj = JSON.parse(r.result);
             let n = 0;
             Object.entries(obj).forEach(([k, v]) => {
               if (k.startsWith(STORAGE_PREFIX)) {
@@ -649,71 +729,65 @@
               }
             });
             alert(`Importación completada (${n} semanas).`);
-            renderTabla();
-          } catch (e) {
+            render();
+          } catch {
             alert("Archivo no válido.");
           }
         };
-        reader.readAsText(file);
+        r.readAsText(file);
       }
 
-      /*****************
-       * Modo oscuro   *
-       *****************/
+      /* ========= Oscuro ========= */
       const DARK_KEY = "rutina_dark_mode";
-      function applyDarkMode() {
-        const enabled = localStorage.getItem(DARK_KEY) === "1";
-        document.documentElement.classList.toggle("dark", enabled);
-        const btn = document.getElementById("darkToggle");
-        if (btn) btn.textContent = enabled ? "☀️" : "🌙";
+      function applyDark() {
+        const on = localStorage.getItem(DARK_KEY) === "1";
+        document.documentElement.classList.toggle("dark", on);
+        el("#darkToggle").textContent = on ? "☀️" : "🌙";
       }
 
-      /*****************
-       * Init          *
-       *****************/
-      function initWeek() {
-        const todayWeek = getISOWeekInputValue(new Date());
-        document.getElementById("weekPicker").value = todayWeek;
+      /* ========= Init ========= */
+      function init() {
+        el("#datePicker").value = getISODateInputValue(new Date());
         updateMonthLabel();
-      }
+        render();
 
-      function main() {
-        initWeek();
-        renderTabla();
-
-        document.getElementById("todayBtn").addEventListener("click", () => {
-          document.getElementById("weekPicker").value = getISOWeekInputValue(
-            new Date()
-          );
+        el("#todayBtn").addEventListener("click", () => {
+          el("#datePicker").value = getISODateInputValue(new Date());
           updateMonthLabel();
-          renderTabla();
+          render();
+        });
+        el("#datePicker").addEventListener("change", () => {
+          updateMonthLabel();
+          render();
         });
 
-        document.getElementById("weekPicker").addEventListener("change", () => {
-          updateMonthLabel();
-          renderTabla();
+        el("#exportBtn").addEventListener("click", exportar);
+        el("#importInput").addEventListener("change", (e) => {
+          const f = e.target.files?.[0];
+          if (f) importar(f);
+          e.target.value = "";
         });
 
-        document
-          .getElementById("exportBtn")
-          .addEventListener("click", exportar);
-        document
-          .getElementById("importInput")
-          .addEventListener("change", (e) => {
-            const file = e.target.files?.[0];
-            if (file) importar(file);
-            e.target.value = "";
-          });
-
-        applyDarkMode();
-        document.getElementById("darkToggle").addEventListener("click", () => {
+        applyDark();
+        el("#darkToggle").addEventListener("click", () => {
           const next = !(localStorage.getItem(DARK_KEY) === "1");
           localStorage.setItem(DARK_KEY, next ? "1" : "0");
-          applyDarkMode();
+          applyDark();
         });
-      }
 
-      document.addEventListener("DOMContentLoaded", main);
+        // Mensaje motivador al abrir
+        const msgs = [
+          "¡A por ello! Pequeñas mejoras suman grandes resultados.",
+          "Hidrátate y calienta bien 💪",
+          "Constancia > Intensidad esporádica.",
+          "Hoy es buen día para progresar.",
+        ];
+        setTimeout(
+          () => toast(msgs[Math.floor(Math.random() * msgs.length)]),
+          400
+        );
+      }
+      document.addEventListener("DOMContentLoaded", init);
     </script>
   </body>
 </html>
