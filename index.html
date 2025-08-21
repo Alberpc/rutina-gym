@@ -300,21 +300,10 @@
           <input id="datePicker" type="date" />
           <button id="todayBtn" class="btn">Esta semana</button>
           <span class="w-px h-6 bg-slate-300 dark:bg-slate-600 mx-2"></span>
-          <button id="exportBtn" class="btn" title="Exportar a JSON">
-            Exportar
-          </button>
-          <label class="btn cursor-pointer" title="Importar JSON">
-            Importar
-            <input
-              id="importInput"
-              type="file"
-              accept="application/json"
-              class="hidden"
-            />
-          </label>
+
           <span class="w-px h-6 bg-slate-300 dark:bg-slate-600 mx-2"></span>
           <button id="darkToggle" class="btn" title="Modo oscuro">🌙</button>
-          <button id="progressBtn" class="btn">📊 Progreso</button>
+          <button id="progressBtn" class="btn btn-primary">📊 Progreso</button>
         </div>
       </div>
     </header>
@@ -333,35 +322,19 @@
     </main>
 
     <!-- Modal Notas -->
-    <dialog class="notes-modal" id="notesModal">
+    <dialog id="progressModal" class="notes-modal">
       <div class="notes-header">
-        <strong>Notas</strong>
-        <button class="btn" id="closeNotes">Cerrar</button>
-      </div>
-      <div class="notes-body">
-        <textarea
-          id="notesTextarea"
-          placeholder="Notas, RPE, técnica…"
-        ></textarea>
-        <div class="mt-3" style="text-align: right">
-          <button class="btn btn-primary" id="saveNotes">Guardar</button>
-        </div>
-      </div>
-    </dialog>
-    <dialog class="notes-modal" id="progressModal">
-      <div class="notes-header">
-        <strong>Progreso semanal</strong>
+        <strong>📊 Tabla de Progreso</strong>
         <button class="btn" id="closeProgress">Cerrar</button>
       </div>
       <div class="notes-body">
         <table id="progressTable" class="w-full text-sm border-collapse">
           <thead>
             <tr>
-              <th>Día</th>
-              <th>Ejercicio</th>
-              <th>Peso</th>
-              <th>Reps</th>
-              <th>Notas</th>
+              <th class="border px-2 py-1">Ejercicio</th>
+              <th class="border px-2 py-1">Fecha</th>
+              <th class="border px-2 py-1">Peso</th>
+              <th class="border px-2 py-1">Reps</th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -589,6 +562,68 @@
         );
       }
 
+      function renderProgress() {
+        const tbody = el("#progressTable tbody");
+        tbody.innerHTML = "";
+
+        // Recoger todos los datos guardados
+        const rows = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && k.startsWith(STORAGE_PREFIX)) {
+            try {
+              const d = JSON.parse(localStorage.getItem(k));
+              const week = k.replace(STORAGE_PREFIX, "");
+              Object.entries(d).forEach(([dia, ejercicios]) => {
+                (ejercicios || []).forEach((ej) => {
+                  (ej.series || []).forEach((s) => {
+                    if (s.peso || s.reps) {
+                      rows.push({
+                        ejercicio: ej.nombre || "—",
+                        peso: parseFloat(String(s.peso).replace(",", ".")) || 0,
+                        reps: parseInt(s.reps || "0", 10),
+                        fecha: dia + " (" + week + ")",
+                      });
+                    }
+                  });
+                });
+              });
+            } catch {}
+          }
+        }
+
+        // Ordenar por ejercicio y fecha
+        rows.sort((a, b) => {
+          if (a.ejercicio !== b.ejercicio)
+            return a.ejercicio.localeCompare(b.ejercicio);
+          return a.fecha.localeCompare(b.fecha);
+        });
+
+        // Agrupar por ejercicio y calcular progreso
+        let lastByEj = {};
+        rows.forEach((r) => {
+          const prev = lastByEj[r.ejercicio];
+          let pesoTxt = r.peso;
+          let repsTxt = r.reps;
+
+          if (prev) {
+            if (r.peso > prev.peso) pesoTxt += " ⬆️";
+            if (r.reps > prev.reps) repsTxt += " ➕";
+          }
+
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+      <td class="border px-2 py-1">${r.ejercicio}</td>
+      <td class="border px-2 py-1">${r.fecha}</td>
+      <td class="border px-2 py-1">${pesoTxt}</td>
+      <td class="border px-2 py-1">${repsTxt}</td>
+    `;
+          tbody.appendChild(tr);
+
+          lastByEj[r.ejercicio] = r;
+        });
+      }
+
       function renderExercise(data, dia, ejercicios, ej, idx) {
         const ex = document.createElement("article");
         ex.className = "exercise";
@@ -812,6 +847,14 @@
           const next = !(localStorage.getItem(DARK_KEY) === "1");
           localStorage.setItem(DARK_KEY, next ? "1" : "0");
           applyDark();
+        });
+
+        el("#progressBtn").addEventListener("click", () => {
+          renderProgress();
+          el("#progressModal").showModal();
+        });
+        el("#closeProgress").addEventListener("click", () => {
+          el("#progressModal").close();
         });
 
         // Mensaje motivador al abrir
