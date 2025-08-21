@@ -270,6 +270,8 @@
         width: 100%;
       }
     </style>
+    <meta name="theme-color" content="#0b1220" />
+    <meta name="background-color" content="#0b1220" />
   </head>
   <body>
     <!-- Toast -->
@@ -283,6 +285,17 @@
           <span id="monthLabel" class="text-sm muted"></span>
         </div>
         <div class="flex flex-wrap items-center gap-2">
+          <select id="dayFilter" class="btn">
+            <option value="all">Toda la semana</option>
+            <option value="Lunes">Lunes</option>
+            <option value="Martes">Martes</option>
+            <option value="Miércoles">Miércoles</option>
+            <option value="Jueves">Jueves</option>
+            <option value="Viernes">Viernes</option>
+            <option value="Sábado">Sábado</option>
+            <option value="Domingo">Domingo</option>
+          </select>
+
           <label for="datePicker" class="text-sm muted">Fecha:</label>
           <input id="datePicker" type="date" />
           <button id="todayBtn" class="btn">Esta semana</button>
@@ -301,6 +314,7 @@
           </label>
           <span class="w-px h-6 bg-slate-300 dark:bg-slate-600 mx-2"></span>
           <button id="darkToggle" class="btn" title="Modo oscuro">🌙</button>
+          <button id="progressBtn" class="btn">📊 Progreso</button>
         </div>
       </div>
     </header>
@@ -332,6 +346,26 @@
         <div class="mt-3" style="text-align: right">
           <button class="btn btn-primary" id="saveNotes">Guardar</button>
         </div>
+      </div>
+    </dialog>
+    <dialog class="notes-modal" id="progressModal">
+      <div class="notes-header">
+        <strong>Progreso semanal</strong>
+        <button class="btn" id="closeProgress">Cerrar</button>
+      </div>
+      <div class="notes-body">
+        <table id="progressTable" class="w-full text-sm border-collapse">
+          <thead>
+            <tr>
+              <th>Día</th>
+              <th>Ejercicio</th>
+              <th>Peso</th>
+              <th>Reps</th>
+              <th>Notas</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
       </div>
     </dialog>
 
@@ -496,13 +530,15 @@
         root.innerHTML = "";
         const data = readWeekData();
 
-        DIAS.forEach((dia) => {
-          const card = document.createElement("section");
-          card.className = "day-card";
-          card.dataset.dia = dia;
+        const filtro = el("#dayFilter")?.value || "all";
+        DIAS.filter((dia) => filtro === "all" || filtro === dia).forEach(
+          (dia) => {
+            const card = document.createElement("section");
+            card.className = "day-card";
+            card.dataset.dia = dia;
 
-          // Header del día
-          card.innerHTML = `
+            // Header del día
+            card.innerHTML = `
       <div class="day-head">
         <div class="flex items-center gap-2">
           <strong>${dia}</strong>
@@ -514,40 +550,43 @@
       </div>
       <div class="day-body" role="list"></div>
     `;
-          root.appendChild(card);
+            root.appendChild(card);
 
-          const body = card.querySelector(".day-body");
-          const ejercicios = data[dia] || [];
+            const body = card.querySelector(".day-body");
+            const ejercicios = data[dia] || [];
 
-          if (ejercicios.length === 0) {
-            const empty = document.createElement("div");
-            empty.className = "muted text-sm";
-            empty.textContent = "Sin ejercicios";
-            body.appendChild(empty);
-          }
-
-          ejercicios.forEach((ej, idx) => {
-            body.appendChild(renderExercise(data, dia, ejercicios, ej, idx));
-          });
-
-          // listeners de día
-          card.querySelector(".add-ejercicio").addEventListener("click", () => {
-            ejercicios.push({
-              nombre: "",
-              series: [{ peso: "", reps: "" }],
-              notas: "",
-            });
-            saveSoon(data);
-            render();
-          });
-          card.querySelector(".limpiar-dia").addEventListener("click", () => {
-            if (confirm(`¿Seguro que quieres limpiar ${dia}?`)) {
-              data[dia] = [];
-              saveSoon(data);
-              render();
+            if (ejercicios.length === 0) {
+              const empty = document.createElement("div");
+              empty.className = "muted text-sm";
+              empty.textContent = "Sin ejercicios";
+              body.appendChild(empty);
             }
-          });
-        });
+
+            ejercicios.forEach((ej, idx) => {
+              body.appendChild(renderExercise(data, dia, ejercicios, ej, idx));
+            });
+
+            // listeners de día
+            card
+              .querySelector(".add-ejercicio")
+              .addEventListener("click", () => {
+                ejercicios.push({
+                  nombre: "",
+                  series: [{ peso: "", reps: "" }],
+                  notas: "",
+                });
+                saveSoon(data);
+                render();
+              });
+            card.querySelector(".limpiar-dia").addEventListener("click", () => {
+              if (confirm(`¿Seguro que quieres limpiar ${dia}?`)) {
+                data[dia] = [];
+                saveSoon(data);
+                render();
+              }
+            });
+          }
+        );
       }
 
       function renderExercise(data, dia, ejercicios, ej, idx) {
@@ -785,6 +824,34 @@
         setTimeout(
           () => toast(msgs[Math.floor(Math.random() * msgs.length)]),
           400
+        );
+        el("#dayFilter").addEventListener("change", render);
+        el("#progressBtn").addEventListener("click", () => {
+          const data = readWeekData();
+          const tbody = el("#progressTable tbody");
+          tbody.innerHTML = "";
+
+          DIAS.forEach((dia) => {
+            (data[dia] || []).forEach((ej) => {
+              (ej.series || []).forEach((s) => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+          <td>${dia}</td>
+          <td>${ej.nombre || ""}</td>
+          <td>${s.peso || ""}</td>
+          <td>${s.reps || ""}</td>
+          <td>${ej.notas || ""}</td>
+        `;
+                tbody.appendChild(row);
+              });
+            });
+          });
+
+          el("#progressModal").showModal();
+        });
+
+        el("#closeProgress").addEventListener("click", () =>
+          el("#progressModal").close()
         );
       }
       document.addEventListener("DOMContentLoaded", init);
