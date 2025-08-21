@@ -3,24 +3,36 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Mi Rutina de Gimnasio — v7 (Cards optimizada)</title>
-    <!-- Tailwind solo para utilidades básicas; el diseño principal va en CSS propio -->
+    <title>Mi Rutina de Gimnasio — v8.1</title>
+
+    <!-- Tailwind utilidades -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = { darkMode: "class" };
     </script>
+
+    <!-- Meta de color: se actualizará por JS al cambiar el modo -->
+    <meta id="theme-color-meta" name="theme-color" content="#f8fafc" />
+
     <style>
+      /* ===== Paleta por variables ===== */
       :root {
-        --bg: #f8fafc;
-        --card: #fff;
-        --muted: #f1f5f9;
-        --border: #e2e8f0;
-        --text: #0f172a;
-        --text-muted: #475569;
-        --accent: #2563eb;
+        /* MODO CLARO (base) */
+        --bg: #f8fafc; /* fondo general claro */
+        --card: #ffffff; /* tarjetas / inputs */
+        --muted: #f1f5f9; /* cabeceras suaves / barras */
+        --border: #e2e8f0; /* bordes claros */
+        --text: #0f172a; /* texto principal oscuro */
+        --text-muted: #475569; /* texto secundario */
+        --accent: #2563eb; /* primario (azul) */
         --accent-600: #1d4ed8;
+        --accent-700: #1d4ed8;
+        --btn-bg: #e2e8f0; /* fondo botones en claro */
+        --btn-bg-hover: #cbd5e1;
+        --table-head: #e9eff7;
       }
       .dark:root {
+        /* MODO OSCURO (override) */
         --bg: #0b1220;
         --card: #0f172a;
         --muted: #0b1220;
@@ -29,18 +41,25 @@
         --text-muted: #94a3b8;
         --accent: #3b82f6;
         --accent-600: #2563eb;
+        --accent-700: #1d4ed8;
+        --btn-bg: #1e293b; /* fondo botones en oscuro */
+        --btn-bg-hover: #263445;
+        --table-head: #0c1628;
       }
+
       body {
         background: var(--bg);
         color: var(--text);
         font-family: ui-sans-serif, system-ui;
         -webkit-font-smoothing: antialiased;
       }
+
       .container {
         max-width: 1120px;
         margin: 0 auto;
         padding: 16px;
       }
+
       header {
         position: sticky;
         top: 0;
@@ -60,22 +79,17 @@
       .muted {
         color: var(--text-muted);
       }
+
       .btn {
         border: 1px solid var(--border);
         border-radius: 8px;
         padding: 0.35rem 0.6rem;
         font-size: 0.85rem;
-        background: #e2e8f0;
+        background: var(--btn-bg);
+        color: var(--text);
       }
       .btn:hover {
-        background: #cbd5e1;
-      }
-      .dark .btn {
-        background: #1e293b;
-        border-color: #334155;
-      }
-      .dark .btn:hover {
-        background: #263445;
+        background: var(--btn-bg-hover);
       }
       .btn-primary {
         background: var(--accent);
@@ -88,28 +102,24 @@
       .btn-ghost {
         background: transparent;
       }
-      .btn-danger {
-        color: #dc2626;
-      }
+
       input,
-      textarea {
+      textarea,
+      select {
         border: 1px solid var(--border);
         border-radius: 8px;
         padding: 0.45rem 0.55rem;
-        background: #fff;
-        color: var(--text);
-      }
-      .dark input,
-      .dark textarea {
-        background: #0b1424;
+        background: var(--card);
         color: var(--text);
       }
       input:focus,
       textarea:focus,
+      select:focus,
       button:focus {
         outline: none;
-        box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.35);
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.35);
       }
+
       /* Grid de días */
       .days {
         display: grid;
@@ -120,24 +130,23 @@
           grid-template-columns: repeat(2, minmax(0, 1fr));
         }
       }
+
       /* Card del día */
       .day-card {
         border: 1px solid var(--border);
         background: var(--card);
         border-radius: 14px;
         overflow: hidden;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
       }
       .day-head {
         display: flex;
         align-items: center;
         justify-content: space-between;
         padding: 10px 12px;
-        background: var(--accent);
-        color: #fff;
-      }
-      .dark .day-head {
-        background: var(--accent-600);
+        background: var(--bg);
+        color: var(--text);
+        border-bottom: 1px solid var(--border);
       }
       .day-body {
         padding: 12px;
@@ -145,6 +154,7 @@
         flex-direction: column;
         gap: 10px;
       }
+
       /* Ejercicio item */
       .exercise {
         border: 1px solid var(--border);
@@ -166,12 +176,7 @@
       .handle:active {
         cursor: grabbing;
       }
-      .ex-actions {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        margin-left: auto;
-      }
+
       .series {
         display: flex;
         flex-direction: column;
@@ -185,7 +190,7 @@
       }
       .serie-row .peso,
       .serie-row .reps {
-        width: 110px;
+        width: 120px;
       }
       .add-serie {
         align-self: flex-start;
@@ -193,6 +198,7 @@
       .notes-quick {
         width: 100%;
       }
+
       /* Drag visual */
       .dragging {
         opacity: 0.6;
@@ -200,6 +206,7 @@
       .drop-target {
         outline: 2px dashed var(--accent);
       }
+
       /* Toasts */
       #toast {
         position: fixed;
@@ -237,12 +244,13 @@
           transform: translateY(6px);
         }
       }
-      /* Modal notas */
+
+      /* Modal reutilizable */
       dialog.notes-modal::backdrop {
         background: rgba(0, 0, 0, 0.35);
       }
       dialog.notes-modal {
-        width: min(720px, 92vw);
+        width: min(960px, 96vw);
         border: 1px solid var(--border);
         border-radius: 12px;
         padding: 0;
@@ -265,13 +273,16 @@
         min-height: 32vh;
       }
 
-      .exercise .handle {
-        text-align: center;
-        width: 100%;
+      /* Tabla progreso */
+      #progressTable th,
+      #progressTable td {
+        border: 1px solid var(--border);
+      }
+      #progressTable th {
+        background: var(--table-head);
+        color: var(--text-muted);
       }
     </style>
-    <meta name="theme-color" content="#0b1220" />
-    <meta name="background-color" content="#0b1220" />
   </head>
   <body>
     <!-- Toast -->
@@ -284,7 +295,12 @@
           <h1 class="text-xl font-bold">🏋️‍♂️ Mi Rutina</h1>
           <span id="monthLabel" class="text-sm muted"></span>
         </div>
+
         <div class="flex flex-wrap items-center gap-2">
+          <label for="datePicker" class="text-sm muted">Fecha:</label>
+          <input id="datePicker" type="date" />
+
+          <!-- Filtro: semana completa o solo un día -->
           <select id="dayFilter" class="btn">
             <option value="all">Toda la semana</option>
             <option value="Lunes">Lunes</option>
@@ -296,14 +312,9 @@
             <option value="Domingo">Domingo</option>
           </select>
 
-          <label for="datePicker" class="text-sm muted">Fecha:</label>
-          <input id="datePicker" type="date" />
           <button id="todayBtn" class="btn">Esta semana</button>
-          <span class="w-px h-6 bg-slate-300 dark:bg-slate-600 mx-2"></span>
-
-          <span class="w-px h-6 bg-slate-300 dark:bg-slate-600 mx-2"></span>
-          <button id="darkToggle" class="btn" title="Modo oscuro">🌙</button>
           <button id="progressBtn" class="btn btn-primary">📊 Progreso</button>
+          <button id="darkToggle" class="btn" title="Modo oscuro">🌙</button>
         </div>
       </div>
     </header>
@@ -312,7 +323,7 @@
     <div class="container">
       <p class="muted text-sm mt-3 mb-2">
         Consejo: usa <strong>☰ Mover</strong> para arrastrar y reordenar
-        ejercicios. Haz clic en el nombre del día para limpiar ese día.
+        ejercicios. Haz clic en <strong>Limpiar</strong> para vaciar un día.
       </p>
     </div>
 
@@ -322,6 +333,23 @@
     </main>
 
     <!-- Modal Notas -->
+    <dialog class="notes-modal" id="notesModal">
+      <div class="notes-header">
+        <strong>Notas</strong>
+        <button class="btn" id="closeNotes">Cerrar</button>
+      </div>
+      <div class="notes-body">
+        <textarea
+          id="notesTextarea"
+          placeholder="Notas, RPE, técnica…"
+        ></textarea>
+        <div class="mt-3" style="text-align: right">
+          <button class="btn btn-primary" id="saveNotes">Guardar</button>
+        </div>
+      </div>
+    </dialog>
+
+    <!-- Modal Progreso -->
     <dialog id="progressModal" class="notes-modal">
       <div class="notes-header">
         <strong>📊 Tabla de Progreso</strong>
@@ -331,10 +359,10 @@
         <table id="progressTable" class="w-full text-sm border-collapse">
           <thead>
             <tr>
-              <th class="border px-2 py-1">Ejercicio</th>
-              <th class="border px-2 py-1">Fecha</th>
-              <th class="border px-2 py-1">Peso</th>
-              <th class="border px-2 py-1">Reps</th>
+              <th class="px-2 py-1">Ejercicio</th>
+              <th class="px-2 py-1">Fecha</th>
+              <th class="px-2 py-1">Peso</th>
+              <th class="px-2 py-1">Reps</th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -416,8 +444,8 @@
         Domingo: [],
       };
 
-      /* ========= Persistencia ========= */
-      const STORAGE_PREFIX = "rutina_cards_v7_";
+      /* ========= Persistencia por semana ========= */
+      const STORAGE_PREFIX = "rutina_cards_v8_1_";
       const el = (s, r = document) => r.querySelector(s);
       const els = (s, r = document) => [...r.querySelectorAll(s)];
 
@@ -438,7 +466,7 @@
       }
       const getWeekKey = () => {
         const v = el("#datePicker").value || getISODateInputValue(new Date());
-        return STORAGE_PREFIX + getISOWeekInputValue(new Date(v));
+        return STORAGE_PREFIX + getISOWeekInputValue(new Date(v)); // p.ej. rutina_cards_v8_1_2025-W34
       };
       const readWeekData = () => {
         const raw = localStorage.getItem(getWeekKey());
@@ -456,7 +484,7 @@
         saveSoon._t = setTimeout(() => writeWeekData(data), 120);
       }
 
-      /* ========= UI util ========= */
+      /* ========= Utilidades de fecha ========= */
       function updateMonthLabel() {
         const v = el("#datePicker").value;
         if (!v) return;
@@ -466,6 +494,30 @@
           year: "numeric",
         }).format(d);
       }
+      function dateForWeekKeyAndDia(isoWeek, diaNombre) {
+        const [y, wRaw] = isoWeek.split("-W");
+        const w = parseInt(wRaw || "1", 10);
+        const jan4 = new Date(Date.UTC(parseInt(y, 10), 0, 4));
+        const jan4Dow = jan4.getUTCDay() || 7;
+        const week1Mon = new Date(jan4);
+        week1Mon.setUTCDate(jan4.getUTCDate() - (jan4Dow - 1));
+        const monOfW = new Date(week1Mon);
+        monOfW.setUTCDate(week1Mon.getUTCDate() + (w - 1) * 7);
+        const idx = DIAS.indexOf(diaNombre);
+        const d = new Date(monOfW);
+        d.setUTCDate(monOfW.getUTCDate() + idx);
+        return new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+      }
+      function formatFechaDiaMes(d) {
+        const dia = String(d.getDate()).padStart(2, "0");
+        const mes = new Intl.DateTimeFormat("es-ES", { month: "long" }).format(
+          d
+        );
+        const año = d.getFullYear();
+        return `${dia} ${mes} ${año}`;
+      }
+
+      /* ========= Toast ========= */
       function toast(msg) {
         const t = el("#toast");
         const n = document.createElement("div");
@@ -474,6 +526,8 @@
         t.appendChild(n);
         setTimeout(() => n.remove(), 3000);
       }
+
+      /* ========= Comparación con semana anterior ========= */
       function compareWithPreviousWeek(dia, idxEj) {
         const currentIso = getWeekKey().replace(STORAGE_PREFIX, "");
         const [year, w] = currentIso.split("-W").map(Number);
@@ -504,123 +558,55 @@
         const data = readWeekData();
 
         const filtro = el("#dayFilter")?.value || "all";
-        DIAS.filter((dia) => filtro === "all" || filtro === dia).forEach(
-          (dia) => {
-            const card = document.createElement("section");
-            card.className = "day-card";
-            card.dataset.dia = dia;
-
-            // Header del día
-            card.innerHTML = `
-      <div class="day-head">
-        <div class="flex items-center gap-2">
-          <strong>${dia}</strong>
-        </div>
-        <div class="flex gap-2">
-          <button class="btn btn-ghost underline limpiar-dia" title="Limpiar ${dia}">Limpiar</button>
-          <button class="btn btn-primary add-ejercicio" title="Añadir ejercicio">+ Añadir</button>
-        </div>
-      </div>
-      <div class="day-body" role="list"></div>
-    `;
-            root.appendChild(card);
-
-            const body = card.querySelector(".day-body");
-            const ejercicios = data[dia] || [];
-
-            if (ejercicios.length === 0) {
-              const empty = document.createElement("div");
-              empty.className = "muted text-sm";
-              empty.textContent = "Sin ejercicios";
-              body.appendChild(empty);
-            }
-
-            ejercicios.forEach((ej, idx) => {
-              body.appendChild(renderExercise(data, dia, ejercicios, ej, idx));
-            });
-
-            // listeners de día
-            card
-              .querySelector(".add-ejercicio")
-              .addEventListener("click", () => {
-                ejercicios.push({
-                  nombre: "",
-                  series: [{ peso: "", reps: "" }],
-                  notas: "",
-                });
-                saveSoon(data);
-                render();
-              });
-            card.querySelector(".limpiar-dia").addEventListener("click", () => {
-              if (confirm(`¿Seguro que quieres limpiar ${dia}?`)) {
-                data[dia] = [];
-                saveSoon(data);
-                render();
-              }
-            });
-          }
+        const diasAMostrar = DIAS.filter(
+          (d) => filtro === "all" || filtro === d
         );
-      }
 
-      function renderProgress() {
-        const tbody = el("#progressTable tbody");
-        tbody.innerHTML = "";
+        diasAMostrar.forEach((dia) => {
+          const card = document.createElement("section");
+          card.className = "day-card";
+          card.dataset.dia = dia;
+          card.innerHTML = `
+          <div class="day-head">
+            <div class="flex items-center gap-2"><strong>${dia}</strong></div>
+            <div class="flex gap-2">
+              <button class="btn btn-ghost underline limpiar-dia" title="Limpiar ${dia}">Limpiar</button>
+              <button class="btn btn-primary add-ejercicio" title="Añadir ejercicio">+ Añadir</button>
+            </div>
+          </div>
+          <div class="day-body" role="list"></div>
+        `;
+          root.appendChild(card);
 
-        // Recoger todos los datos guardados
-        const rows = [];
-        for (let i = 0; i < localStorage.length; i++) {
-          const k = localStorage.key(i);
-          if (k && k.startsWith(STORAGE_PREFIX)) {
-            try {
-              const d = JSON.parse(localStorage.getItem(k));
-              const week = k.replace(STORAGE_PREFIX, "");
-              Object.entries(d).forEach(([dia, ejercicios]) => {
-                (ejercicios || []).forEach((ej) => {
-                  (ej.series || []).forEach((s) => {
-                    if (s.peso || s.reps) {
-                      rows.push({
-                        ejercicio: ej.nombre || "—",
-                        peso: parseFloat(String(s.peso).replace(",", ".")) || 0,
-                        reps: parseInt(s.reps || "0", 10),
-                        fecha: dia + " (" + week + ")",
-                      });
-                    }
-                  });
-                });
-              });
-            } catch {}
+          const body = card.querySelector(".day-body");
+          const ejercicios = data[dia] || [];
+          if (ejercicios.length === 0) {
+            const empty = document.createElement("div");
+            empty.className = "muted text-sm";
+            empty.textContent = "Sin ejercicios";
+            body.appendChild(empty);
           }
-        }
+          ejercicios.forEach((ej, idx) =>
+            body.appendChild(renderExercise(data, dia, ejercicios, ej, idx))
+          );
 
-        // Ordenar por ejercicio y fecha
-        rows.sort((a, b) => {
-          if (a.ejercicio !== b.ejercicio)
-            return a.ejercicio.localeCompare(b.ejercicio);
-          return a.fecha.localeCompare(b.fecha);
-        });
-
-        // Agrupar por ejercicio y calcular progreso
-        let lastByEj = {};
-        rows.forEach((r) => {
-          const prev = lastByEj[r.ejercicio];
-          let pesoTxt = r.peso;
-          let repsTxt = r.reps;
-
-          if (prev) {
-            if (r.peso > prev.peso) pesoTxt += " ⬆️";
-            if (r.reps > prev.reps) repsTxt += " ➕";
-          }
-
-          const tr = document.createElement("tr");
-          tr.innerHTML = `
-      <td class="border px-2 py-1">${r.ejercicio}</td>
-      <td class="border px-2 py-1">${r.fecha}</td>
-      <td class="border px-2 py-1">${pesoTxt}</td>
-      <td class="border px-2 py-1">${repsTxt}</td>
-    `;
-          tbody.appendChild(tr);
-
-          lastByEj[r.ejercicio] = r;
+          // Listeners del día
+          card.querySelector(".add-ejercicio").addEventListener("click", () => {
+            ejercicios.push({
+              nombre: "",
+              series: [{ peso: "", reps: "" }],
+              notas: "",
+            });
+            saveSoon(data);
+            render();
+          });
+          card.querySelector(".limpiar-dia").addEventListener("click", () => {
+            if (confirm(`¿Seguro que quieres limpiar ${dia}?`)) {
+              data[dia] = [];
+              saveSoon(data);
+              render();
+            }
+          });
         });
       }
 
@@ -628,21 +614,20 @@
         const ex = document.createElement("article");
         ex.className = "exercise";
         ex.setAttribute("role", "listitem");
-
         ex.innerHTML = `
-   <div class="ex-top">
-     <input class="ex-name flex-1" placeholder="Nombre del ejercicio" />
-   </div>
-   <div class="series"></div>
-    <button class="btn add-serie">+ Añadir serie</button>
-   <div class="notes">
-     <textarea class="notes-quick" rows="2" placeholder="Notas rápidas (RPE, técnica…)"></textarea>
-     <button class="btn mt-2 open-notes">✎ Editar en grande</button>
-  </div>
-  <div class="mt-3">
-    <button class="btn handle w-full" draggable="true" title="Arrastra para reordenar">☰ Mover</button>
-  </div>
-  `;
+        <div class="ex-top">
+          <input class="ex-name flex-1" placeholder="Nombre del ejercicio" />
+        </div>
+        <div class="series"></div>
+        <button class="btn add-serie">+ Añadir serie</button>
+        <div class="notes">
+          <textarea class="notes-quick" rows="2" placeholder="Notas rápidas (RPE, técnica…)"></textarea>
+          <button class="btn mt-2 open-notes">✎ Editar en grande</button>
+        </div>
+        <div class="mt-3">
+          <button class="btn handle w-full" draggable="true" title="Arrastra para reordenar">☰ Mover</button>
+        </div>
+      `;
 
         const name = ex.querySelector(".ex-name");
         name.value = ej.nombre || "";
@@ -659,11 +644,11 @@
             const row = document.createElement("div");
             row.className = "serie-row";
             row.innerHTML = `
-        <input class="peso" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" placeholder="Peso (kg)" title="Peso (kg)" />
-        <span>×</span>
-        <input class="reps" type="number" min="0" placeholder="Reps" />
-        <button class="btn remove-serie" title="Quitar serie">–</button>
-      `;
+            <input class="peso" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" placeholder="Peso (kg)" title="Peso (kg)"/>
+            <span>×</span>
+            <input class="reps" type="number" min="0" placeholder="Reps"/>
+            <button class="btn remove-serie" title="Quitar serie">–</button>
+          `;
             const peso = row.querySelector(".peso");
             const reps = row.querySelector(".reps");
             const rmv = row.querySelector(".remove-serie");
@@ -736,7 +721,7 @@
           el("#closeNotes").onclick = () => notesModal.close();
         });
 
-        // Drag & drop (solo con handle)
+        // Drag & drop
         const handle = ex.querySelector(".handle");
         handle.addEventListener("dragstart", (e) => {
           ex.classList.add("dragging");
@@ -745,8 +730,6 @@
         handle.addEventListener("dragend", () =>
           ex.classList.remove("dragging")
         );
-
-        // Receptores: todos los exercise hermanos
         ex.addEventListener("dragover", (e) => {
           e.preventDefault();
           ex.classList.add("drop-target");
@@ -773,56 +756,87 @@
         return ex;
       }
 
-      /* ========= Export/Import ========= */
-      function exportar() {
-        const all = {};
+      /* ========= Tabla de PROGRESO ========= */
+      function renderProgress() {
+        const tbody = el("#progressTable tbody");
+        tbody.innerHTML = "";
+        const rows = [];
         for (let i = 0; i < localStorage.length; i++) {
           const k = localStorage.key(i);
-          if (k && k.startsWith(STORAGE_PREFIX))
-            all[k] = localStorage.getItem(k);
-        }
-        const blob = new Blob([JSON.stringify(all, null, 2)], {
-          type: "application/json",
-        });
-        const a = document.createElement("a");
-        a.href = URL.createObjectURL(blob);
-        a.download = "mi_rutina_gimnasio.json";
-        a.click();
-        URL.revokeObjectURL(a.href);
-      }
-      function importar(file) {
-        const r = new FileReader();
-        r.onload = () => {
-          try {
-            const obj = JSON.parse(r.result);
-            let n = 0;
-            Object.entries(obj).forEach(([k, v]) => {
-              if (k.startsWith(STORAGE_PREFIX)) {
-                localStorage.setItem(k, v);
-                n++;
-              }
-            });
-            alert(`Importación completada (${n} semanas).`);
-            render();
-          } catch {
-            alert("Archivo no válido.");
+          if (k && k.startsWith(STORAGE_PREFIX)) {
+            try {
+              const d = JSON.parse(localStorage.getItem(k));
+              const isoWeek = k.replace(STORAGE_PREFIX, ""); // "YYYY-Www"
+              Object.entries(d).forEach(([dia, ejercicios]) => {
+                (ejercicios || []).forEach((ej) => {
+                  (ej.series || []).forEach((s) => {
+                    if (s.peso || s.reps) {
+                      const fecha = dateForWeekKeyAndDia(isoWeek, dia);
+                      rows.push({
+                        ejercicio: ej.nombre || "—",
+                        fecha,
+                        fechaTxt: formatFechaDiaMes(fecha),
+                        peso: parseFloat(String(s.peso).replace(",", ".")) || 0,
+                        reps: parseInt(s.reps || "0", 10),
+                      });
+                    }
+                  });
+                });
+              });
+            } catch {}
           }
-        };
-        r.readAsText(file);
+        }
+
+        // Ordenar por ejercicio y fecha
+        rows.sort((a, b) =>
+          a.ejercicio !== b.ejercicio
+            ? a.ejercicio.localeCompare(b.ejercicio)
+            : a.fecha - b.fecha
+        );
+
+        // Comparar con el día anterior del mismo ejercicio
+        const lastByEj = {};
+        rows.forEach((r) => {
+          const prev = lastByEj[r.ejercicio];
+          let pesoTxt = r.peso ? r.peso.toString() : "";
+          let repsTxt = r.reps ? r.reps.toString() : "";
+          if (prev) {
+            if (r.peso > prev.peso) pesoTxt += " ⬆️";
+            if (r.reps > prev.reps) repsTxt += " ➕";
+          }
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+          <td class="px-2 py-1">${r.ejercicio}</td>
+          <td class="px-2 py-1">${r.fechaTxt}</td>
+          <td class="px-2 py-1">${pesoTxt}</td>
+          <td class="px-2 py-1">${repsTxt}</td>
+        `;
+          tbody.appendChild(tr);
+          lastByEj[r.ejercicio] = r;
+        });
       }
 
-      /* ========= Oscuro ========= */
+      /* ========= Modo oscuro ========= */
       const DARK_KEY = "rutina_dark_mode";
+      function setThemeMetaToCurrentBg() {
+        const meta = document.getElementById("theme-color-meta");
+        const bg = getComputedStyle(document.documentElement)
+          .getPropertyValue("--bg")
+          .trim();
+        if (meta && bg) meta.setAttribute("content", bg);
+      }
       function applyDark() {
         const on = localStorage.getItem(DARK_KEY) === "1";
         document.documentElement.classList.toggle("dark", on);
         el("#darkToggle").textContent = on ? "☀️" : "🌙";
+        setThemeMetaToCurrentBg(); // actualiza la barra del móvil
       }
 
       /* ========= Init ========= */
       function init() {
         el("#datePicker").value = getISODateInputValue(new Date());
         updateMonthLabel();
+        applyDark(); // aplica desde localStorage (por defecto claro)
         render();
 
         el("#todayBtn").addEventListener("click", () => {
@@ -834,15 +848,8 @@
           updateMonthLabel();
           render();
         });
+        el("#dayFilter").addEventListener("change", render);
 
-        el("#exportBtn").addEventListener("click", exportar);
-        el("#importInput").addEventListener("change", (e) => {
-          const f = e.target.files?.[0];
-          if (f) importar(f);
-          e.target.value = "";
-        });
-
-        applyDark();
         el("#darkToggle").addEventListener("click", () => {
           const next = !(localStorage.getItem(DARK_KEY) === "1");
           localStorage.setItem(DARK_KEY, next ? "1" : "0");
@@ -853,9 +860,9 @@
           renderProgress();
           el("#progressModal").showModal();
         });
-        el("#closeProgress").addEventListener("click", () => {
-          el("#progressModal").close();
-        });
+        el("#closeProgress").addEventListener("click", () =>
+          el("#progressModal").close()
+        );
 
         // Mensaje motivador al abrir
         const msgs = [
@@ -868,49 +875,15 @@
           () => toast(msgs[Math.floor(Math.random() * msgs.length)]),
           400
         );
-        el("#dayFilter").addEventListener("change", render);
-        el("#progressBtn").addEventListener("click", () => {
-          const data = readWeekData();
-          const tbody = el("#progressTable tbody");
-          tbody.innerHTML = "";
-
-          DIAS.forEach((dia) => {
-            (data[dia] || []).forEach((ej) => {
-              (ej.series || []).forEach((s) => {
-                const row = document.createElement("tr");
-                row.innerHTML = `
-          <td>${dia}</td>
-          <td>${ej.nombre || ""}</td>
-          <td>${s.peso || ""}</td>
-          <td>${s.reps || ""}</td>
-          <td>${ej.notas || ""}</td>
-        `;
-                tbody.appendChild(row);
-              });
-            });
-          });
-
-          el("#progressModal").showModal();
-        });
-
-        el("#closeProgress").addEventListener("click", () =>
-          el("#progressModal").close()
-        );
       }
       document.addEventListener("DOMContentLoaded", init);
 
+      // (Opcional) SW si lo usas
       if ("serviceWorker" in navigator) {
-        navigator.serviceWorker
-          .register("/service-worker.js")
-          .then((reg) => {
-            console.log("Service Worker registrado:", reg);
-          })
-          .catch((err) => console.log("Error al registrar SW:", err));
-
-        // Esto fuerza a recargar cuando hay una nueva versión
-        navigator.serviceWorker.addEventListener("controllerchange", () => {
-          window.location.reload();
-        });
+        navigator.serviceWorker.register("service-worker.js").catch(() => {});
+        navigator.serviceWorker.addEventListener("controllerchange", () =>
+          window.location.reload()
+        );
       }
     </script>
   </body>
