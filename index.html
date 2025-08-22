@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Mi Rutina de Gimnasio — v8.1</title>
+    <title>Mi Rutina de Gimnasio — v9 (Plantilla semanal)</title>
 
     <!-- Tailwind utilidades -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -11,28 +11,27 @@
       tailwind.config = { darkMode: "class" };
     </script>
 
-    <!-- Meta de color: se actualizará por JS al cambiar el modo -->
+    <!-- Meta de color (se actualiza con el modo) -->
     <meta id="theme-color-meta" name="theme-color" content="#f8fafc" />
 
     <style>
       /* ===== Paleta por variables ===== */
       :root {
-        /* MODO CLARO (base) */
-        --bg: #f8fafc; /* fondo general claro */
-        --card: #ffffff; /* tarjetas / inputs */
-        --muted: #f1f5f9; /* cabeceras suaves / barras */
-        --border: #e2e8f0; /* bordes claros */
-        --text: #0f172a; /* texto principal oscuro */
-        --text-muted: #475569; /* texto secundario */
-        --accent: #2563eb; /* primario (azul) */
+        /* CLARO (base) */
+        --bg: #f8fafc;
+        --card: #ffffff;
+        --muted: #f1f5f9;
+        --border: #e2e8f0;
+        --text: #0f172a;
+        --text-muted: #475569;
+        --accent: #2563eb;
         --accent-600: #1d4ed8;
-        --accent-700: #1d4ed8;
-        --btn-bg: #e2e8f0; /* fondo botones en claro */
+        --btn-bg: #e2e8f0;
         --btn-bg-hover: #cbd5e1;
         --table-head: #e9eff7;
       }
       .dark:root {
-        /* MODO OSCURO (override) */
+        /* OSCURO */
         --bg: #0b1220;
         --card: #0f172a;
         --muted: #0b1220;
@@ -41,8 +40,7 @@
         --text-muted: #94a3b8;
         --accent: #3b82f6;
         --accent-600: #2563eb;
-        --accent-700: #1d4ed8;
-        --btn-bg: #1e293b; /* fondo botones en oscuro */
+        --btn-bg: #1e293b;
         --btn-bg-hover: #263445;
         --table-head: #0c1628;
       }
@@ -53,7 +51,6 @@
         font-family: ui-sans-serif, system-ui;
         -webkit-font-smoothing: antialiased;
       }
-
       .container {
         max-width: 1120px;
         margin: 0 auto;
@@ -99,7 +96,8 @@
       .btn-primary:hover {
         background: var(--accent-600);
       }
-      .btn-ghost {
+      .btn-danger {
+        color: #dc2626;
         background: transparent;
       }
 
@@ -155,7 +153,7 @@
         gap: 10px;
       }
 
-      /* Ejercicio item */
+      /* Ejercicio */
       .exercise {
         border: 1px solid var(--border);
         border-radius: 12px;
@@ -199,7 +197,7 @@
         width: 100%;
       }
 
-      /* Drag visual */
+      /* Drag */
       .dragging {
         opacity: 0.6;
       }
@@ -207,7 +205,7 @@
         outline: 2px dashed var(--accent);
       }
 
-      /* Toasts */
+      /* Toast */
       #toast {
         position: fixed;
         left: 0;
@@ -245,7 +243,7 @@
         }
       }
 
-      /* Modal reutilizable */
+      /* Modal */
       dialog.notes-modal::backdrop {
         background: rgba(0, 0, 0, 0.35);
       }
@@ -270,7 +268,7 @@
       }
       .notes-body textarea {
         width: 100%;
-        min-height: 32vh;
+        min-height: 28vh;
       }
 
       /* Tabla progreso */
@@ -281,6 +279,20 @@
       #progressTable th {
         background: var(--table-head);
         color: var(--text-muted);
+      }
+
+      /* Plantilla grid */
+      .tpl-grid {
+        display: grid;
+        gap: 12px;
+      }
+      @media (min-width: 900px) {
+        .tpl-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+      .tpl-col textarea {
+        min-height: 140px;
       }
     </style>
   </head>
@@ -314,6 +326,7 @@
 
           <button id="todayBtn" class="btn">Esta semana</button>
           <button id="progressBtn" class="btn btn-primary">📊 Progreso</button>
+          <button id="templateBtn" class="btn">🧩 Plantilla</button>
           <button id="darkToggle" class="btn" title="Modo oscuro">🌙</button>
         </div>
       </div>
@@ -322,8 +335,9 @@
     <!-- Tips -->
     <div class="container">
       <p class="muted text-sm mt-3 mb-2">
-        Consejo: usa <strong>☰ Mover</strong> para arrastrar y reordenar
-        ejercicios. Haz clic en <strong>Limpiar</strong> para vaciar un día.
+        Consejo: usa <strong>☰ Mover</strong> para arrastrar ejercicios. “🧩
+        Plantilla” te permite definir tu rutina semanal por defecto para nuevas
+        semanas.
       </p>
     </div>
 
@@ -370,8 +384,86 @@
       </div>
     </dialog>
 
+    <!-- Modal Plantilla -->
+    <dialog id="templateModal" class="notes-modal">
+      <div class="notes-header">
+        <strong>🧩 Plantilla semanal (una línea = un ejercicio)</strong>
+        <div class="flex gap-2">
+          <button
+            class="btn"
+            id="applyTemplateToWeek"
+            title="Reemplaza la semana actual por la plantilla"
+          >
+            Aplicar a semana
+          </button>
+          <button class="btn btn-primary" id="saveTemplate">
+            Guardar plantilla
+          </button>
+          <button class="btn" id="closeTemplate">Cerrar</button>
+        </div>
+      </div>
+      <div class="notes-body">
+        <div class="tpl-grid">
+          <!-- 7 columnas de plantilla -->
+          <div class="tpl-col">
+            <label class="muted text-sm">Lunes</label>
+            <textarea
+              id="tpl_Lunes"
+              placeholder="Ejercicio 1&#10;Ejercicio 2"
+            ></textarea>
+          </div>
+          <div class="tpl-col">
+            <label class="muted text-sm">Martes</label>
+            <textarea
+              id="tpl_Martes"
+              placeholder="Ejercicio 1&#10;Ejercicio 2"
+            ></textarea>
+          </div>
+          <div class="tpl-col">
+            <label class="muted text-sm">Miércoles</label>
+            <textarea
+              id="tpl_Miércoles"
+              placeholder="Ejercicio 1&#10;Ejercicio 2"
+            ></textarea>
+          </div>
+          <div class="tpl-col">
+            <label class="muted text-sm">Jueves</label>
+            <textarea
+              id="tpl_Jueves"
+              placeholder="Ejercicio 1&#10;Ejercicio 2"
+            ></textarea>
+          </div>
+          <div class="tpl-col">
+            <label class="muted text-sm">Viernes</label>
+            <textarea
+              id="tpl_Viernes"
+              placeholder="Ejercicio 1&#10;Ejercicio 2"
+            ></textarea>
+          </div>
+          <div class="tpl-col">
+            <label class="muted text-sm">Sábado</label>
+            <textarea
+              id="tpl_Sábado"
+              placeholder="Ejercicio 1&#10;Ejercicio 2"
+            ></textarea>
+          </div>
+          <div class="tpl-col">
+            <label class="muted text-sm">Domingo</label>
+            <textarea
+              id="tpl_Domingo"
+              placeholder="Ejercicio 1&#10;Ejercicio 2"
+            ></textarea>
+          </div>
+        </div>
+        <p class="muted text-xs mt-3">
+          💡 La plantilla se usa únicamente para semanas nuevas. Las semanas ya
+          guardadas no cambian salvo que pulses “Aplicar a semana”.
+        </p>
+      </div>
+    </dialog>
+
     <script>
-      /* ========= Datos base ========= */
+      /* ========= Constantes y semillas ========= */
       const DIAS = [
         "Lunes",
         "Martes",
@@ -444,11 +536,15 @@
         Domingo: [],
       };
 
-      /* ========= Persistencia por semana ========= */
-      const STORAGE_PREFIX = "rutina_cards_v8_1_";
+      /* ========= Claves de almacenamiento ========= */
+      const STORAGE_PREFIX = "rutina_cards_v9_"; // semanas
+      const TEMPLATE_KEY = "rutina_template_v1"; // plantilla
+
+      /* ========= Helpers DOM ========= */
       const el = (s, r = document) => r.querySelector(s);
       const els = (s, r = document) => [...r.querySelectorAll(s)];
 
+      /* ========= Fechas ========= */
       const getISODateInputValue = (d) =>
         `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(
           2,
@@ -466,17 +562,40 @@
       }
       const getWeekKey = () => {
         const v = el("#datePicker").value || getISODateInputValue(new Date());
-        return STORAGE_PREFIX + getISOWeekInputValue(new Date(v)); // p.ej. rutina_cards_v8_1_2025-W34
+        return STORAGE_PREFIX + getISOWeekInputValue(new Date(v));
       };
-      const readWeekData = () => {
-        const raw = localStorage.getItem(getWeekKey());
-        if (!raw) return structuredClone(RUTINA_SEMILLA);
+
+      /* ========= Persistencia ========= */
+      function loadTemplate() {
+        const raw = localStorage.getItem(TEMPLATE_KEY);
+        if (!raw) return null;
         try {
           return JSON.parse(raw);
         } catch {
-          return structuredClone(RUTINA_SEMILLA);
+          return null;
         }
-      };
+      }
+      function saveTemplate(tpl) {
+        localStorage.setItem(TEMPLATE_KEY, JSON.stringify(tpl));
+      }
+      function deepClone(o) {
+        return JSON.parse(JSON.stringify(o));
+      }
+
+      function readWeekData() {
+        const key = getWeekKey();
+        const raw = localStorage.getItem(key);
+        if (raw) {
+          try {
+            return JSON.parse(raw);
+          } catch {
+            return deepClone(RUTINA_SEMILLA);
+          }
+        }
+        // Semana nueva -> inicializar desde plantilla si existe, si no desde semilla
+        const tpl = loadTemplate();
+        return tpl ? deepClone(tpl) : deepClone(RUTINA_SEMILLA);
+      }
       const writeWeekData = (data) =>
         localStorage.setItem(getWeekKey(), JSON.stringify(data));
       function saveSoon(data) {
@@ -484,7 +603,7 @@
         saveSoon._t = setTimeout(() => writeWeekData(data), 120);
       }
 
-      /* ========= Utilidades de fecha ========= */
+      /* ========= Utilidades de fecha para UI ========= */
       function updateMonthLabel() {
         const v = el("#datePicker").value;
         if (!v) return;
@@ -527,7 +646,7 @@
         setTimeout(() => n.remove(), 3000);
       }
 
-      /* ========= Comparación con semana anterior ========= */
+      /* ========= Comparar semana anterior (toasts al editar) ========= */
       function compareWithPreviousWeek(dia, idxEj) {
         const currentIso = getWeekKey().replace(STORAGE_PREFIX, "");
         const [year, w] = currentIso.split("-W").map(Number);
@@ -551,7 +670,7 @@
         }
       }
 
-      /* ========= Render ========= */
+      /* ========= Render principal ========= */
       function render() {
         const root = el("#days");
         root.innerHTML = "";
@@ -590,7 +709,6 @@
             body.appendChild(renderExercise(data, dia, ejercicios, ej, idx))
           );
 
-          // Listeners del día
           card.querySelector(".add-ejercicio").addEventListener("click", () => {
             ejercicios.push({
               nombre: "",
@@ -756,7 +874,7 @@
         return ex;
       }
 
-      /* ========= Tabla de PROGRESO ========= */
+      /* ========= Progreso ========= */
       function renderProgress() {
         const tbody = el("#progressTable tbody");
         tbody.innerHTML = "";
@@ -786,15 +904,12 @@
             } catch {}
           }
         }
-
-        // Ordenar por ejercicio y fecha
         rows.sort((a, b) =>
           a.ejercicio !== b.ejercicio
             ? a.ejercicio.localeCompare(b.ejercicio)
             : a.fecha - b.fecha
         );
 
-        // Comparar con el día anterior del mismo ejercicio
         const lastByEj = {};
         rows.forEach((r) => {
           const prev = lastByEj[r.ejercicio];
@@ -816,6 +931,33 @@
         });
       }
 
+      /* ========= Plantilla semanal ========= */
+      function openTemplateModal() {
+        // Cargar plantilla o semilla en los textareas
+        const tpl = loadTemplate() || deepClone(RUTINA_SEMILLA);
+        DIAS.forEach((dia) => {
+          const area = el("#tpl_" + dia);
+          area.value = (tpl[dia] || []).map((e) => e.nombre).join("\n");
+        });
+        el("#templateModal").showModal();
+      }
+      function readTemplateFromForm() {
+        const tpl = {};
+        DIAS.forEach((dia) => {
+          const raw = el("#tpl_" + dia).value || "";
+          const lines = raw
+            .split("\n")
+            .map((s) => s.trim())
+            .filter(Boolean);
+          tpl[dia] = lines.map((nombre) => ({
+            nombre,
+            series: [{ peso: "", reps: "" }],
+            notas: "",
+          }));
+        });
+        return tpl;
+      }
+
       /* ========= Modo oscuro ========= */
       const DARK_KEY = "rutina_dark_mode";
       function setThemeMetaToCurrentBg() {
@@ -829,16 +971,17 @@
         const on = localStorage.getItem(DARK_KEY) === "1";
         document.documentElement.classList.toggle("dark", on);
         el("#darkToggle").textContent = on ? "☀️" : "🌙";
-        setThemeMetaToCurrentBg(); // actualiza la barra del móvil
+        setThemeMetaToCurrentBg();
       }
 
       /* ========= Init ========= */
       function init() {
         el("#datePicker").value = getISODateInputValue(new Date());
         updateMonthLabel();
-        applyDark(); // aplica desde localStorage (por defecto claro)
+        applyDark();
         render();
 
+        // Fecha / filtro
         el("#todayBtn").addEventListener("click", () => {
           el("#datePicker").value = getISODateInputValue(new Date());
           updateMonthLabel();
@@ -850,12 +993,14 @@
         });
         el("#dayFilter").addEventListener("change", render);
 
+        // Modo
         el("#darkToggle").addEventListener("click", () => {
           const next = !(localStorage.getItem(DARK_KEY) === "1");
           localStorage.setItem(DARK_KEY, next ? "1" : "0");
           applyDark();
         });
 
+        // Progreso
         el("#progressBtn").addEventListener("click", () => {
           renderProgress();
           el("#progressModal").showModal();
@@ -864,7 +1009,31 @@
           el("#progressModal").close()
         );
 
-        // Mensaje motivador al abrir
+        // Plantilla
+        el("#templateBtn").addEventListener("click", openTemplateModal);
+        el("#closeTemplate").addEventListener("click", () =>
+          el("#templateModal").close()
+        );
+        el("#saveTemplate").addEventListener("click", () => {
+          const tpl = readTemplateFromForm();
+          saveTemplate(tpl);
+          toast("✅ Plantilla guardada");
+        });
+        el("#applyTemplateToWeek").addEventListener("click", () => {
+          if (
+            !confirm(
+              "Esto reemplazará TODA la semana actual por la plantilla. ¿Continuar?"
+            )
+          )
+            return;
+          const tpl = loadTemplate() || readTemplateFromForm();
+          writeWeekData(deepClone(tpl));
+          el("#templateModal").close();
+          render();
+          toast("📅 Semana reemplazada desde la plantilla");
+        });
+
+        // Mensaje motivador
         const msgs = [
           "¡A por ello! Pequeñas mejoras suman grandes resultados.",
           "Hidrátate y calienta bien 💪",
@@ -878,7 +1047,7 @@
       }
       document.addEventListener("DOMContentLoaded", init);
 
-      // (Opcional) SW si lo usas
+      // SW (opcional)
       if ("serviceWorker" in navigator) {
         navigator.serviceWorker.register("service-worker.js").catch(() => {});
         navigator.serviceWorker.addEventListener("controllerchange", () =>
